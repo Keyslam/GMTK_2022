@@ -1,0 +1,23 @@
+{
+    "Lua.runtime.version": "LuaJIT",
+    "Lua.workspace.library": [
+        "${3rd}/love2d/library",
+		"game/lib"
+    ],
+    "Lua.workspace.checkThirdParty": false,
+	"Lua.workspace.ignoreDir": [
+		".vscode",
+		".github",
+		"game/lib",
+		"scripts",
+	],
+    "Lua.diagnostics.globals": [
+        "love",
+        "ECS",
+		"Assemblages"
+    ],
+
+    "editor.tabSize": 4,
+    "editor.insertSpaces": false,
+    "editor.detectIndentation": false,
+}
