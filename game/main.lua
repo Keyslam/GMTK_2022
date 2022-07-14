@@ -1,10 +1,16 @@
 love.graphics.setDefaultFilter("nearest", "nearest")
 
+local SheetLoader = require("src.sheetLoader")
+local Batteries = require("lib.batteries")
+
 ECS = require("lib.concord")
 Imgui = require("imgui")
 Vector = require("lib.vector")
 CPML = require("lib.cpml")
+Peachy = require("lib.peachy")
 TDRenderer = require("src.tdrenderer")
+Vec3 = Batteries.vec3
+Vec2 = Batteries.vec2
 Assemblages = {}
 
 local Systems = {}
@@ -17,75 +23,62 @@ local World = ECS.world()
 World:addSystems(
 	Systems.controlsMovement,
 	Systems.velocityIntegration,
+	Systems.applyFriction,
+	Systems.ikSolving,
+	Systems.syncQuadData,
 
+	Systems.updateAnimatedSprites,
 	Systems.spriteRendering
 )
 
-local img = love.graphics.newImage("assets/tilemap.png")
-local sw, sh = img:getDimensions()
-local wizard = love.graphics.newQuad(0, 119, 16, 16, sw, sh)
+local Tilemap = SheetLoader:loadSheet("assets/tilemap.png", require("assets.tilemap"))
+local Spider = SheetLoader:loadSheet("assets/spider.png", require("assets.spider"))
+local CountAndColours = love.graphics.newImage("assets/countAndColours.png")
 
 local Camera = ECS.entity(World)
-	:assemble(Assemblages.camera, CPML.vec3(0, 0, -500), CPML.vec2(-math.pi, 0), 640, 360)
+	:assemble(Assemblages.camera, Vec3(0, 0, -500), Vec2(-math.pi, 0), 640, 360)
 
 local Sun = ECS.entity(World)
-	:assemble(Assemblages.sun, CPML.vec3(-123.802, 0.000, -223.610), CPML.vec2(-15.337, 0.3), 640, 360)
+	:assemble(Assemblages.sun, Vec3(-123.802, 0.000, -223.610), Vec2(-15.337, 0.3), 640, 360)
 
 local Player = ECS.entity(World)
-	:assemble(Assemblages.player, img, wizard, CPML.vec3(0, 0, 0))
+	:assemble(Assemblages.player, Tilemap.image, Tilemap.quads.wizard, Vec3(0, 0, 0), Vec3(8, 0, 0), Vec3(8, 0, 0))
+
+-- local Chest= ECS.entity(World)
+-- 	:assemble(Assemblages.prop, Tilemap.image, Tilemap.quads.chest_closed, Vec3(0, 0, 0))
+
+-- local Num = ECS.entity(World)
+-- 	:assemble(Assemblages.animatedProp, CountAndColours, "assets/countAndColours.json", "Numbers", Vec3(32, 0, 0))
+
+local SpiderHead = ECS.entity(World)
+	:assemble(Assemblages.prop, Spider.image, Spider.quads.head, Vec3(0, 0, 70), Vec3(41.5, 0, 0), Vec3(41.5, 0, 0))
+
+local SpiderHipLeft = ECS.entity(World)
+	:assemble(Assemblages.prop, Spider.image, Spider.quads.hip, Vec3(0, 0, 0), Vec3(41.5, 37.5, 0), Vec3(41.5, 37.5))
+
+local SpiderKneeLeft = ECS.entity(World)
+	:assemble(Assemblages.prop, Spider.image, Spider.quads.knee, Vec3(0, 0, 0), Vec3(7.5, 43.5, 0), Vec3(7.5, 43.5))
+
+local SpiderLeftIK = ECS.entity(World)
+	:assemble(Assemblages.ik, SpiderHead, Vec3(17.5, -7.5, 0), SpiderHipLeft, Vec3(41, 37, 0), SpiderKneeLeft)
+
+-- local SpiderHipRight = ECS.entity(World)
+-- 	:assemble(Assemblages.prop, Spider.image, Spider.quads.hip, Vec3(100, 0, 20))
+
+-- local SpiderKneeRight = ECS.entity(World)
+-- 	:assemble(Assemblages.prop, Spider.image, Spider.quads.knee, Vec3(100, 0, 20))
 
 function love.load()
 	World:emit("load")
 end
 
-local playerPos = CPML.vec3(0, 0, 0)
-local playerVel = CPML.vec3(0, 0, 0)
-local flip = false
-
-local imgSpider = love.graphics.newImage("assets/spider.png")
-local ssw, ssh = imgSpider:getDimensions()
-local spiderHead = love.graphics.newQuad(0, 0, 82, 38, ssw, ssh)
-local spiderHip = love.graphics.newQuad(83, 0, 42, 38, ssw, ssh)
-local spiderKnee = love.graphics.newQuad(126, 0, 10, 44, ssw, ssh)
-
-
-local chest = love.graphics.newQuad(85, 119, 16, 16, sw, sh)
-local table = love.graphics.newQuad(0, 101, 16, 16, sw, sh)
-local potion = love.graphics.newQuad(119, 153, 16, 16, sw, sh)
-
-local fenceL = love.graphics.newQuad(68, 102, 16, 16, sw, sh)
-local fenceM = love.graphics.newQuad(85, 102, 16, 16, sw, sh)
-local fenceR = love.graphics.newQuad(102, 102, 16, 16, sw, sh)
-
-local ground = love.graphics.newQuad(0, 68, 16, 16, sw, sh)
-local groundVariationA = love.graphics.newQuad(17, 68, 16, 16, sw, sh)
-local groundVariationB = love.graphics.newQuad(102, 51, 16, 16, sw, sh)
-
-local wallL = love.graphics.newQuad(153, 68, 16, 16, sw, sh)
-local wallM = love.graphics.newQuad(68, 51, 16, 16, sw, sh)
-local wallMVar = love.graphics.newQuad(68, 34, 16, 16, sw, sh)
-local wallR = love.graphics.newQuad(187, 68, 16, 16, sw, sh)
-local stair = love.graphics.newQuad(51, 51, 16, 16, sw, sh)
-
-local wallTopM = love.graphics.newQuad(34, 0, 16, 16, sw, sh)
-local wallTopBendTL = love.graphics.newQuad(68, 0, 16, 16, sw, sh)
-local wallTopBendTR = love.graphics.newQuad(85, 0, 16, 16, sw, sh)
-local wallTopBendBL = love.graphics.newQuad(68, 17, 16, 16, sw, sh)
-local wallTopBendBR = love.graphics.newQuad(85, 17, 16, 16, sw, sh)
-local wallTopMid = love.graphics.newQuad(0, 0, 16, 16, sw, sh)
-local wallTopBack = love.graphics.newQuad(34, 34, 16, 16, sw, sh)
-
-
-
-local grave = love.graphics.newQuad(68, 85, 16, 16, sw, sh)
-
 for x = -10, 20 do
 	for y = -10, 20 do
 		local rand = love.math.random()
-		local quad = rand < 0.9 and ground or rand < 0.97 and groundVariationA or groundVariationB
+		local quad = rand < 0.9 and Tilemap.quads.sand_1 or rand < 0.97 and Tilemap.quads.sand_2 or Tilemap.quads.sand_3
 
 		ECS.entity(World)
-		:assemble(Assemblages.tile, img, quad, CPML.vec3(x * 16, y * 16, 0))
+			:assemble(Assemblages.tile, Tilemap.image, quad, Vec3(x * 16, y * 16, 0))
 	end
 end
 
@@ -93,50 +86,10 @@ function love.update(dt)
 	Imgui.NewFrame(true)
 
 	World:emit("update", dt)
-
-	local movementVector = CPML.vec3()
-	-- if love.keyboard.isDown("w") then movementVector = movementVector + Camera.transform.forward end
-	-- if love.keyboard.isDown("s") then movementVector = movementVector - Camera.transform.forward end
-
-	-- if love.keyboard.isDown("a") then movementVector = movementVector + Camera.transform.right end
-	-- if love.keyboard.isDown("d") then movementVector = movementVector - Camera.transform.right end
-
-	if love.keyboard.isDown("space") then movementVector.y = movementVector.y + 1 end
-	if love.keyboard.isDown("lshift") then movementVector.y = movementVector.y - 1 end
-
-	Camera.transform.position = Camera.transform.position + movementVector * 50 * dt
-
-
-	local speed = 600
-	if love.keyboard.isDown("left") then
-		playerVel = playerVel + CPML.vec3(-speed, 0, 0) * dt
-		flip = true
-	end
-	if love.keyboard.isDown("right") then
-		playerVel = playerVel + CPML.vec3(speed, 0, 0) * dt
-		flip = false
-	end
-
-	if love.keyboard.isDown("up") then playerVel = playerVel + CPML.vec3(0, speed, 0) * dt end
-	if love.keyboard.isDown("down") then playerVel = playerVel + CPML.vec3(0, -speed, 0) * dt end
-
-	if love.keyboard.isDown("q") then playerPos = playerPos + CPML.vec3(0, 0, 10) * dt end
-	if love.keyboard.isDown("e") then playerPos = playerPos + CPML.vec3(0, 0, -10) * dt end
-
-
-	local friction = 15
-	local ratio = 1 / (1 + (dt * friction))
-	playerVel = playerVel * ratio
-
-	playerPos = playerPos + playerVel * dt
 end
 
 function love.draw()
 	World:emit("draw")
-
-	-- TDRenderer:drawStanding(imgSpider, spiderKnee, CPML.vec3(30, -30, 0), true)
-	-- TDRenderer:drawStanding(imgSpider, spiderHip, CPML.vec3(36, -30, 44), true)
-	-- TDRenderer:drawStanding(imgSpider, spiderHead, CPML.vec3(30 + 30, -30, 44 + 38 - 12))
 
 	TDRenderer:flush(Camera, Sun)
 
@@ -144,9 +97,9 @@ function love.draw()
 		local fps = love.timer.getFPS()
 		local stats = love.graphics.getStats()
 
-		Imgui.Text("FPS: " ..fps)
-		Imgui.Text("Drawcalls: " ..stats.drawcalls)
-		
+		Imgui.Text("FPS: " .. fps)
+		Imgui.Text("Drawcalls: " .. stats.drawcalls)
+
 		Imgui.End()
 	end
 
@@ -204,9 +157,8 @@ function love.mousemoved(x, y, dx, dy)
 		World:emit("mousemoved", event)
 
 		if love.mouse.getRelativeMode() then
-			local rotationVector = CPML.vec2(-dx, dy)
-			Camera.transform.rotation = Camera.transform.rotation + rotationVector / 80
-			print(rotationVector)
+			local rotationVector = Vec2(-dx, dy)
+			Camera.tdRotation.rotation:vaddi(rotationVector:sdivi(80))
 			-- Sun.rotation = Sun.rotation + rotationVector / 80
 		end
 	end

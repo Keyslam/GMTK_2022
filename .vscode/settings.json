@@ -16,7 +16,9 @@
         "ECS",
 		"Assemblages",
 		"CPML",
-		"TDRenderer"
+		"TDRenderer",
+		"Vec2",
+		"Vec3"
     ],
 
     "editor.tabSize": 4,

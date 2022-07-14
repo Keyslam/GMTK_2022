@@ -3,8 +3,12 @@ local VelocityIntegration = ECS.system({
 })
 
 function VelocityIntegration:update(dt)
+	local velocity = Vec3()
+
 	for _, e in ipairs(self.pool) do
-		e.transform.position = e.transform.position + e.velocity.value * dt
+		velocity:vset(e.velocity.value)
+		velocity:smuli(dt)
+		e.transform.position:vaddi(velocity)
 	end
 end
 

@@ -6,7 +6,8 @@ return function(e, position, rotation, width, height, near, far)
 	far = far or 1000
 
 	return e
-	:give("transform", position, rotation)
+	:give("transform", position, 0)
+	:give("tdRotation", rotation)
 	:give("projection", CPML.mat4.from_ortho(
 		-halfWidth, halfWidth,
 		-halfHeight, halfHeight,
