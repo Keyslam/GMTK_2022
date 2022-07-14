@@ -14,7 +14,9 @@
     "Lua.diagnostics.globals": [
         "love",
         "ECS",
-		"Assemblages"
+		"Assemblages",
+		"CPML",
+		"TDRenderer"
     ],
 
     "editor.tabSize": 4,
