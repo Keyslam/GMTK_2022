@@ -24,8 +24,8 @@ World:addSystems(
 	Systems.controlsMovement,
 	Systems.velocityIntegration,
 	Systems.applyFriction,
-	Systems.ikSolving,
 	Systems.syncQuadData,
+	Systems.ikSolving,
 
 	Systems.updateAnimatedSprites,
 	Systems.spriteRendering
@@ -60,7 +60,7 @@ local SpiderKneeLeft = ECS.entity(World)
 	:assemble(Assemblages.prop, Spider.image, Spider.quads.knee, Vec3(0, 0, 0), Vec3(7.5, 43.5, 0), Vec3(7.5, 43.5))
 
 local SpiderLeftIK = ECS.entity(World)
-	:assemble(Assemblages.ik, SpiderHead, Vec3(17.5, -7.5, 0), SpiderHipLeft, Vec3(41, 37, 0), SpiderKneeLeft)
+	:assemble(Assemblages.ik, SpiderHead, Vec3(17.5, -7.5, 0), SpiderHipLeft, Vec3(0, 0, 0), SpiderKneeLeft)
 
 -- local SpiderHipRight = ECS.entity(World)
 -- 	:assemble(Assemblages.prop, Spider.image, Spider.quads.hip, Vec3(100, 0, 20))

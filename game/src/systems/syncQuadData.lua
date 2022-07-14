@@ -40,18 +40,15 @@ function SyncQuadData:update(dt)
 		local v1 = iy / sh
 		local v2 = v1 + ih / sh
 
-		local x1 = position.x
-		local x2 = x1 + iw
-		local y1 = position.y + position.z
-		local y2 = y1 + ih
-		local z1 = position.z
-		local z2 = position.z
-
 		if (e.sprite.flipX) then
 			u1, u2 = u2, u1
 		end
 
-		if (e.sprite.kind == "STANDING") then
+		local x1, x2 = position.x, position.x + iw
+		local y1, y2 = position.y + position.z, position.y + position.z + ih
+		local z1, z2 = position.z, position.z
+
+		if (e.sprite.kind == "PROP") then
 			z2 = z2 + ih
 			pivot.y = pivot.y + position.z
 		end
@@ -61,39 +58,12 @@ function SyncQuadData:update(dt)
 		p3:sset(x2, y2, z2)
 		p4:sset(x1, y2, z2)
 
-		if (rotation ~= 0) then
-			p1:vsubi(position):vsubi(pivot)
-			p2:vsubi(position):vsubi(pivot)
-			p3:vsubi(position):vsubi(pivot)
-			p4:vsubi(position):vsubi(pivot)
+		e.quadData:updateNormal(p1, p2, p3)
 
-			local q = p1:vsub(p2)
-			local r = p3:vsub(p2)
-			Vec3.cross(q, r, normal):normalisei()
-
-			local c = math.cos(rotation)
-			local s = math.sin(rotation)
-
-			Vec3.cross(normal, p1, p1c):smuli(s)
-			Vec3.cross(normal, p2, p2c):smuli(s)
-			Vec3.cross(normal, p3, p3c):smuli(s)
-			Vec3.cross(normal, p4, p4c):smuli(s)
-
-			p1:smuli(c):vaddi(p1c)
-			p2:smuli(c):vaddi(p2c)
-			p3:smuli(c):vaddi(p3c)
-			p4:smuli(c):vaddi(p4c)
-
-			p1:vaddi(position):vaddi(pivot)
-			p2:vaddi(position):vaddi(pivot)
-			p3:vaddi(position):vaddi(pivot)
-			p4:vaddi(position):vaddi(pivot)
-		end
-
-		p1:vsubi(origin)
-		p2:vsubi(origin)
-		p3:vsubi(origin)
-		p4:vsubi(origin)
+		e.quadData:rotatePoint(p1, position, pivot, rotation, origin)
+		e.quadData:rotatePoint(p2, position, pivot, rotation, origin)
+		e.quadData:rotatePoint(p3, position, pivot, rotation, origin)
+		e.quadData:rotatePoint(p4, position, pivot, rotation, origin)
 
 		e.quadData.topLeft.position:vset(p1)
 		e.quadData.topLeft.uvs:sset(u2, v2)
