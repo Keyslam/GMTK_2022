@@ -71,10 +71,10 @@ function TDRenderer:writeVertexAndIndexData()
 			local p3 = quadData.bottomLeft
 			local p4 = quadData.bottomRight
 
-			table.insert(mesh.vertices, { p1.position.x, p1.position.y, p1.position.z, p1.uvs.x, p1.uvs.y })
-			table.insert(mesh.vertices, { p2.position.x, p2.position.y, p2.position.z, p2.uvs.x, p2.uvs.y })
-			table.insert(mesh.vertices, { p3.position.x, p3.position.y, p3.position.z, p3.uvs.x, p3.uvs.y })
-			table.insert(mesh.vertices, { p4.position.x, p4.position.y, p4.position.z, p4.uvs.x, p4.uvs.y })
+			table.insert(mesh.vertices, { p1.worldPosition.x, p1.worldPosition.y, p1.worldPosition.z, p1.uvs.x, p1.uvs.y })
+			table.insert(mesh.vertices, { p2.worldPosition.x, p2.worldPosition.y, p2.worldPosition.z, p2.uvs.x, p2.uvs.y })
+			table.insert(mesh.vertices, { p3.worldPosition.x, p3.worldPosition.y, p3.worldPosition.z, p3.uvs.x, p3.uvs.y })
+			table.insert(mesh.vertices, { p4.worldPosition.x, p4.worldPosition.y, p4.worldPosition.z, p4.uvs.x, p4.uvs.y })
 
 			table.insert(mesh.indices, i)
 			table.insert(mesh.indices, i + 2)

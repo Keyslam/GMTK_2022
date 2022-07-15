@@ -32,17 +32,21 @@ World:addSystems(
 )
 
 local Tilemap = SheetLoader:loadSheet("assets/tilemap.png", require("assets.tilemap"))
+local Point = SheetLoader:loadSheet("assets/point.png", require("assets.point"))
 local Spider = SheetLoader:loadSheet("assets/spider.png", require("assets.spider"))
 local CountAndColours = love.graphics.newImage("assets/countAndColours.png")
 
 local Camera = ECS.entity(World)
 	:assemble(Assemblages.camera, Vec3(0, 0, -500), Vec2(-math.pi, 0), 640, 360)
 
+-- local Camera = ECS.entity(World)
+-- 	:assemble(Assemblages.debugCamera)
+
 local Sun = ECS.entity(World)
 	:assemble(Assemblages.sun, Vec3(-123.802, 0.000, -223.610), Vec2(-15.337, 0.3), 640, 360)
 
 local Player = ECS.entity(World)
-	:assemble(Assemblages.player, Tilemap.image, Tilemap.quads.wizard, Vec3(0, 0, 0), Vec3(8, 0, 0), Vec3(8, 0, 0))
+	:assemble(Assemblages.player, Tilemap.image, Tilemap.quads.wizard, Vec3(0, 0, 8), Vec3(0, 0, 0))
 
 -- local Chest= ECS.entity(World)
 -- 	:assemble(Assemblages.prop, Tilemap.image, Tilemap.quads.chest_closed, Vec3(0, 0, 0))
@@ -50,19 +54,29 @@ local Player = ECS.entity(World)
 -- local Num = ECS.entity(World)
 -- 	:assemble(Assemblages.animatedProp, CountAndColours, "assets/countAndColours.json", "Numbers", Vec3(32, 0, 0))
 
-local SpiderHead = ECS.entity(World)
-	:assemble(Assemblages.prop, Spider.image, Spider.quads.head, Vec3(0, 0, 70), Vec3(41.5, 0, 0), Vec3(41.5, 0, 0))
+-- local SpiderHead = ECS.entity(World)
+-- 	:assemble(Assemblages.prop, Spider.image, Spider.quads.head, Vec3(0, 0, 20), Vec3(0, -19, 0))
 
-local SpiderHipLeft = ECS.entity(World)
-	:assemble(Assemblages.prop, Spider.image, Spider.quads.hip, Vec3(0, 0, 0), Vec3(41.5, 37.5, 0), Vec3(41.5, 37.5))
+-- local SpiderHipLeft = ECS.entity(World)
+-- 	:assemble(Assemblages.prop, Spider.image, Spider.quads.hip, Vec3(0, 0, 8), Vec3(20.5, 18.5, 0))
 
-local SpiderKneeLeft = ECS.entity(World)
-	:assemble(Assemblages.prop, Spider.image, Spider.quads.knee, Vec3(0, 0, 0), Vec3(7.5, 43.5, 0), Vec3(7.5, 43.5))
+-- local SpiderKneeLeft = ECS.entity(World)
+-- 	:assemble(Assemblages.prop, Spider.image, Spider.quads.knee, Vec3(0, 0, 22), Vec3(2.5, 21.5, 0))
 
-local SpiderLeftIK = ECS.entity(World)
-	:assemble(Assemblages.ik, SpiderHead, Vec3(17.5, -7.5, 0), SpiderHipLeft, Vec3(0, 0, 0), SpiderKneeLeft)
+-- -- local rootConnection = Vec3(-17.5, -11.5, 0)
+-- -- local rootConnection = Vec3(-35.5, -3.5, 0)
 
--- local SpiderHipRight = ECS.entity(World)
+-- local SpiderLeftIK = ECS.entity(World)
+-- 	:assemble(Assemblages.ik, SpiderHead, Vec3(-17.5, -11.5, 0), SpiderHipLeft, Vec3(-20.5, 18.5, -18.5), SpiderKneeLeft)
+
+
+local p = Vec3(0, 0, 0)
+-- p:vaddi(o):vaddi(rootConnection):vaddi(Vec3(0, 0, 7.5))
+
+ECS.entity(World)
+	:assemble(Assemblages.prop, Point.image, Point.quads.red, p, Vec3(0, 0, 0), Vec3(0, 0, 0))
+
+	-- local SpiderHipRight = ECS.entity(World)
 -- 	:assemble(Assemblages.prop, Spider.image, Spider.quads.hip, Vec3(100, 0, 20))
 
 -- local SpiderKneeRight = ECS.entity(World)
@@ -85,7 +99,54 @@ end
 function love.update(dt)
 	Imgui.NewFrame(true)
 
+	local movementVector = Vec3(0, 0, 0)
+	if love.keyboard.isDown("space") then movementVector:vaddi(Camera.tdRotation.forward) end
+	if love.keyboard.isDown("lshift") then movementVector:vsubi(Camera.tdRotation.forward) end
+
+	if love.keyboard.isDown("right") then movementVector:vaddi(Camera.tdRotation.right) end
+	if love.keyboard.isDown("left") then movementVector:vsubi(Camera.tdRotation.right) end
+
+	if love.keyboard.isDown("down") then movementVector.y = movementVector.y + 1 end
+	if love.keyboard.isDown("up") then movementVector.y = movementVector.y - 1 end
+
+	movementVector:smuli(50)
+	movementVector:smuli(dt)
+	Camera.transform.position:vaddi(movementVector)
+
 	World:emit("update", dt)
+
+	-- local rootConnection = Vec3(-17.5, 7.5, 0)
+	-- do
+	-- 	local piv = Vec3():vset(SpiderHead.sprite.pivot)
+	-- 	local ix, iy, iw, ih = SpiderHead.sprite.quad:getViewport()
+	-- 	piv.z = piv.z + (piv.y/(ih/2) * ih/2)
+	-- 	SpiderHead.quadData:localToWorld(rootConnection, SpiderHead.transform.position, piv, SpiderHead.transform.rotation)
+	-- 	print(rootConnection)
+	-- 	-- print(rootConnection)
+	-- end
+	-- p:vset(rootConnection)
+	-- -- p:vset(SpiderHead.quadData.topLeft.position)
+	-- p.y = SpiderHead.transform.position.y
+	-- print(SpiderHead.transform.position.z)
+	-- p:ssubi(0, SpiderHead.transform.position.z * 2, 0)
+	-- p:ssubi(0, 0, 0)
+
+	local pivotDiagonal = Vec3():vset(Player.sprite.pivotDiagonal)
+	local normalDiagonal = Vec3():vset(Player.quadData.diagonalNormal)
+	local origin = Vec3(0, -8, 0)
+	local out = Player.sprite:spriteToWorldSprite(origin)
+	local diagonalHipConnection = Vec3():vset(Player.quadData:localToWorldNoZ(out, Player.transform.position, pivotDiagonal, Player.transform.rotation, normalDiagonal))
+	-- print(out, diagonalHipConnection)
+
+
+	-- local pivotDiagonal = Vec3():vset(Player.sprite.pivotDiagonal)
+	-- local normalDiagonal = Vec3():vset(Player.quadData.diagonalNormal)
+	-- local diagonalHipConnection = Vec3():vset(Player.quadData:localToWorldNoZ(origin, Player.transform.position, pivotDiagonal, Player.transform.rotation, normalDiagonal))
+	p:vset(diagonalHipConnection)
+	-- print(Player.quadData.flatNormal)
+	-- p:sset(-38, -11, 100)
+
+	-- SpiderHead.transform.position = Vec3(0, 0, (math.sin(love.timer.getTime()) + 1) * 10 + 100)
 end
 
 function love.draw()
@@ -157,9 +218,8 @@ function love.mousemoved(x, y, dx, dy)
 		World:emit("mousemoved", event)
 
 		if love.mouse.getRelativeMode() then
-			local rotationVector = Vec2(-dx, dy)
+			local rotationVector = Vec3(-dx, dy)
 			Camera.tdRotation.rotation:vaddi(rotationVector:sdivi(80))
-			-- Sun.rotation = Sun.rotation + rotationVector / 80
 		end
 	end
 end

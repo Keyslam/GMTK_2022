@@ -36,7 +36,7 @@ function ControlsMovement:update(dt)
 			e.transform.rotation = 0
 		end
 
-		-- e.transform.rotation = love.timer.getTime()
+		e.transform.rotation = love.timer.getTime()
 	end
 end
 
