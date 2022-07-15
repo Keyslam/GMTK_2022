@@ -1,4 +1,4 @@
-return function(e, position, rotation, width, height, near, far)
+return function(e, position, rotation, width, height, near, far, target)
 	local halfWidth = width/2
 	local halfHeight = height/2
 
@@ -13,6 +13,7 @@ return function(e, position, rotation, width, height, near, far)
 		-halfHeight, halfHeight,
 		near, far
 	))
+	:give("cameraFollowing", target)
 	-- :give("projection", CPML.mat4.from_perspective(
 	-- 	90, 
 	-- 	love.graphics.getWidth() / love.graphics.getHeight(), 

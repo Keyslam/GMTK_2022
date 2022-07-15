@@ -1,4 +1,6 @@
 love.graphics.setDefaultFilter("nearest", "nearest")
+local cursor = love.mouse.newCursor( "assets/crosshair.png", 12.5, 12.5)
+love.mouse.setCursor(cursor)
 
 local SheetLoader = require("src.sheetLoader")
 local Batteries = require("lib.batteries")
@@ -24,7 +26,14 @@ World:addSystems(
 	Systems.controlsMovement,
 	Systems.velocityIntegration,
 	Systems.applyFriction,
+
+	Systems.cameraFollowing,
+
+	Systems.aimAtMouse,
+	Systems.aim,
+
 	Systems.syncQuadData,
+	Systems.attachmentFollowing,
 
 	Systems.updateAnimatedSprites,
 	Systems.spriteRendering
@@ -33,9 +42,8 @@ World:addSystems(
 local Tilemap = SheetLoader:loadSheet("assets/tilemap.png", require("assets.tilemap"))
 local Point = SheetLoader:loadSheet("assets/point.png", require("assets.point"))
 local CountAndColours = love.graphics.newImage("assets/countAndColours.png")
-
-local Camera = ECS.entity(World)
-	:assemble(Assemblages.camera, Vec3(0, 0, -500), Vec2(-math.pi, 0), 640, 360)
+local img = love.graphics.newImage("assets/meeple.png")
+local q = love.graphics.newQuad(0, 0, 17, 18, 17, 18)
 
 -- local Camera = ECS.entity(World)
 -- 	:assemble(Assemblages.debugCamera)
@@ -43,11 +51,20 @@ local Camera = ECS.entity(World)
 local Sun = ECS.entity(World)
 	:assemble(Assemblages.sun, Vec3(-123.802, 0.000, -223.610), Vec2(-15.337, 0.3), 640, 360)
 
-local Player = ECS.entity(World)
-	:assemble(Assemblages.player, Tilemap.image, Tilemap.quads.wizard, Vec3(0, 0, 0), Vec2(0, -8))
 
-local Numbers = ECS.entity(World)
-	:assemble(Assemblages.animatedProp, CountAndColours, "assets/countAndColours.json", "PingPong", Vec3(0, 0, 0), Vec2(0, -20), false, false)
+local Gun = ECS.entity(World)
+	:assemble(Assemblages.prop, Tilemap.image, Tilemap.quads.gun, Vec3(0, 0, 5), Vec2(-3, -1))
+	:give("aiming", Vec2(100, 0), Vec2(0, 0))
+	:give("aimAtMouse")
+
+local Player = ECS.entity(World)
+	:assemble(Assemblages.player, img, q, Vec3(0, 0, 0), Vec2(0, -9), Gun)
+
+local Camera = ECS.entity(World)
+	:assemble(Assemblages.camera, Vec3(0, 0, -500), Vec2(-math.pi, 0), 640, 360, nil, nil, Player)
+
+local Point = ECS.entity(World)
+	:assemble(Assemblages.tile, Point.image, Point.quads.red, Vec3(0, 0, 0.1), Vec2(0, 0))
 
 function love.load()
 	World:emit("load")
@@ -81,6 +98,16 @@ function love.update(dt)
 	Camera.transform.position:vaddi(movementVector)
 
 	World:emit("update", dt)
+
+	local mx, my = love.mouse.getPosition()
+	mx = ((mx - (1920/2)) / 1920) * 640
+	my = ((my - (1080/2)) / 1080) * 360
+	mx = mx - Camera.transform.position.x
+	my = my * -1
+	my = my - Camera.transform.position.y
+
+	Point.transform.position:sset(mx, my, 0.1)
+	-- 	e.aiming.target = Vec2(mx, -my)
 end
 
 function love.draw()

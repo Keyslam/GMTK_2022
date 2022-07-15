@@ -31,7 +31,7 @@ function ControlsMovement:update(dt)
 		e.velocity.value:vaddi(movementVector)
 
 		if (movementVector:length() > 0.1) then
-			e.transform.rotation = math.sin(love.timer.getTime() * 10) * 0.08
+			e.transform.rotation = math.sin(love.timer.getTime() * 15) * 0.1
 		else
 			e.transform.rotation = 0
 		end

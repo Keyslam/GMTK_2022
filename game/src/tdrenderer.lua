@@ -111,6 +111,11 @@ function TDRenderer:renderScene(camera, sun)
 	local _cameraEye = camera.transform.position
 	local cameraEye = CPML.vec3(_cameraEye.x, _cameraEye.y, _cameraEye.z)
 
+	-- cameraEye.x = math.floor(cameraEye.x)
+	-- cameraEye.y = math.floor(cameraEye.y)
+	-- cameraEye.z = math.floor(cameraEye.z)
+
+
 	local _cameraCenter = camera.transform.position:vadd(camera.tdRotation.direction)
 	local cameraCenter = CPML.vec3(_cameraCenter.x, _cameraCenter.y, _cameraCenter.z)
 

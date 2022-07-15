@@ -47,6 +47,12 @@ local Tilemap = {
 		w = 16,
 		h = 16,
 	},
+	gun = {
+		x = 85,
+		y = 137,
+		w = 16,
+		h = 16,
+	}
 }
 
 return Tilemap
