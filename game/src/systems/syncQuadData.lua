@@ -17,6 +17,7 @@ end
 function SyncQuadData:update(dt)
 	for _, e in ipairs(self.pool) do
 		e.quadData:updateWorldPositions(e.transform, e.sprite)
+		e.quadData:updateUvs(e.sprite)
 	end
 end
 

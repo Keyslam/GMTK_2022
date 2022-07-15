@@ -32,7 +32,6 @@ World:addSystems(
 
 local Tilemap = SheetLoader:loadSheet("assets/tilemap.png", require("assets.tilemap"))
 local Point = SheetLoader:loadSheet("assets/point.png", require("assets.point"))
-local Spider = SheetLoader:loadSheet("assets/spider.png", require("assets.spider"))
 local CountAndColours = love.graphics.newImage("assets/countAndColours.png")
 
 local Camera = ECS.entity(World)
@@ -47,19 +46,8 @@ local Sun = ECS.entity(World)
 local Player = ECS.entity(World)
 	:assemble(Assemblages.player, Tilemap.image, Tilemap.quads.wizard, Vec3(0, 0, 0), Vec2(0, -8))
 
-local SpiderHead = ECS.entity(World)
-	:assemble(Assemblages.prop, Spider.image, Spider.quads.head, Vec3(100, 0, 93), Vec2(0, -19))
-
-local hipJointStart = Vec2(20.5, 18.5)
-local SpiderHipLeft = ECS.entity(World)
-	:assemble(Assemblages.prop, Spider.image, Spider.quads.hip, Vec3(0, 0, 0), hipJointStart)
-
-local kneeJointStart = Vec2(2.5, 21.5)
-local SpiderKneeLeft = ECS.entity(World)
-	:assemble(Assemblages.prop, Spider.image, Spider.quads.knee, Vec3(0, 0, 50), Vec2(2.5, 21.5))
-
-local P = ECS.entity(World)
-	:assemble(Assemblages.prop, Point.image, Point.quads.red, Vec3(0, 0, 0), Vec2(0, 0))
+local Numbers = ECS.entity(World)
+	:assemble(Assemblages.animatedProp, CountAndColours, "assets/countAndColours.json", "PingPong", Vec3(0, 0, 0), Vec2(0, -20), false, false)
 
 function love.load()
 	World:emit("load")
@@ -93,44 +81,6 @@ function love.update(dt)
 	Camera.transform.position:vaddi(movementVector)
 
 	World:emit("update", dt)
-
-	local root = Vec2(-17.5, -11.5)
-	local hipJointEnd = Vec2(-20.5, -18.5)
-	local kneeJointEnd = Vec2(4, -18.5)
-
-	local hipJointLength = Vec2.distance(hipJointStart, hipJointEnd)
-	local kneeJointLength = Vec2.distance(kneeJointStart, kneeJointEnd)
-
-	local target = Vec3(100, 0, 50)
-	local distanceBetweenRootAndTarget = Vec2.distance(root, target)
-
-	local cosAngle0 = ((distanceBetweenRootAndTarget * distanceBetweenRootAndTarget) + (hipJointLength * hipJointLength) - (kneeJointLength * kneeJointLength)) / (2 * distanceBetweenRootAndTarget * hipJointLength);
-	local angle0 = math.acos(cosAngle0);
-	local cosAngle1 = ((kneeJointLength * kneeJointLength) + (hipJointLength * hipJointLength) - (distanceBetweenRootAndTarget * distanceBetweenRootAndTarget)) / (2 * kneeJointLength * hipJointLength);
-	local angle1 = math.acos(cosAngle1);
-	-- print(angle0)
-
-	do
-		local connectPoint = root
-		local p = SpiderHead.quadData:localPointTo3DPoint(connectPoint, SpiderHead.transform, SpiderHead.sprite)
-		SpiderHipLeft.transform.position:vset(p)
-	end
-
-	do
-		local connectPoint = hipJointEnd
-		local p = SpiderHipLeft.quadData:localPointTo3DPoint(connectPoint, SpiderHipLeft.transform, SpiderHipLeft.sprite)
-		SpiderKneeLeft.transform.position:vset(p)
-	end
-
-
-	-- SpiderHead.transform.rotation = love.timer.getTime()
-	SpiderHipLeft.transform.rotation = cosAngle0
-	SpiderKneeLeft.transform.rotation = cosAngle0
-
-	SpiderHipLeft.transform.rotation = math.sin(love.timer.getTime() * 1.7) * 0.6
-	SpiderKneeLeft.transform.rotation = math.sin(love.timer.getTime() * 1.3) * 0.3
-
-	P.transform.position:vset(target):saddi(0, -90, 0)
 end
 
 function love.draw()

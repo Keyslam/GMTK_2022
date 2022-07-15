@@ -6,8 +6,13 @@ local QuadData = ECS.component("quadData", function(e)
 end)
 
 function QuadData:buildLocalData(sprite)
-	local ix, iy, iw, ih = sprite.qx, sprite.qy, sprite.qw, sprite.qh
-	local sw, sh = sprite.sw, sprite.sh
+	self:updateUvs(sprite)
+	self:updateLocalPositions(sprite)
+end
+
+function QuadData:updateUvs(sprite)
+	local ix, iy, iw, ih = sprite.quad:getViewport()
+	local sw, sh = sprite.quad:getTextureDimensions()
 
 	local u1 = ix / sw
 	local u2 = u1 + iw / sw
@@ -18,6 +23,10 @@ function QuadData:buildLocalData(sprite)
 	self.topRight.uvs:sset(u1, v2)
 	self.bottomLeft.uvs:sset(u2, v1)
 	self.bottomRight.uvs:sset(u1, v1)
+end
+
+function QuadData:updateLocalPositions(sprite)
+	local _, _, iw, ih = sprite.quad:getViewport()
 
 	local x1, x2 = -iw/2, iw/2
 	local y1, y2 = -ih/2, ih/2
