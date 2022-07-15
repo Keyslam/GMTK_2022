@@ -35,8 +35,6 @@ function ControlsMovement:update(dt)
 		else
 			e.transform.rotation = 0
 		end
-
-		e.transform.rotation = love.timer.getTime()
 	end
 end
 

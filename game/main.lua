@@ -25,7 +25,6 @@ World:addSystems(
 	Systems.velocityIntegration,
 	Systems.applyFriction,
 	Systems.syncQuadData,
-	Systems.ikSolving,
 
 	Systems.updateAnimatedSprites,
 	Systems.spriteRendering
@@ -46,41 +45,21 @@ local Sun = ECS.entity(World)
 	:assemble(Assemblages.sun, Vec3(-123.802, 0.000, -223.610), Vec2(-15.337, 0.3), 640, 360)
 
 local Player = ECS.entity(World)
-	:assemble(Assemblages.player, Tilemap.image, Tilemap.quads.wizard, Vec3(0, 0, 8), Vec3(0, 0, 0))
+	:assemble(Assemblages.player, Tilemap.image, Tilemap.quads.wizard, Vec3(0, 0, 0), Vec2(0, -8))
 
--- local Chest= ECS.entity(World)
--- 	:assemble(Assemblages.prop, Tilemap.image, Tilemap.quads.chest_closed, Vec3(0, 0, 0))
+local SpiderHead = ECS.entity(World)
+	:assemble(Assemblages.prop, Spider.image, Spider.quads.head, Vec3(100, 0, 93), Vec2(0, -19))
 
--- local Num = ECS.entity(World)
--- 	:assemble(Assemblages.animatedProp, CountAndColours, "assets/countAndColours.json", "Numbers", Vec3(32, 0, 0))
+local hipJointStart = Vec2(20.5, 18.5)
+local SpiderHipLeft = ECS.entity(World)
+	:assemble(Assemblages.prop, Spider.image, Spider.quads.hip, Vec3(0, 0, 0), hipJointStart)
 
--- local SpiderHead = ECS.entity(World)
--- 	:assemble(Assemblages.prop, Spider.image, Spider.quads.head, Vec3(0, 0, 20), Vec3(0, -19, 0))
+local kneeJointStart = Vec2(2.5, 21.5)
+local SpiderKneeLeft = ECS.entity(World)
+	:assemble(Assemblages.prop, Spider.image, Spider.quads.knee, Vec3(0, 0, 50), Vec2(2.5, 21.5))
 
--- local SpiderHipLeft = ECS.entity(World)
--- 	:assemble(Assemblages.prop, Spider.image, Spider.quads.hip, Vec3(0, 0, 8), Vec3(20.5, 18.5, 0))
-
--- local SpiderKneeLeft = ECS.entity(World)
--- 	:assemble(Assemblages.prop, Spider.image, Spider.quads.knee, Vec3(0, 0, 22), Vec3(2.5, 21.5, 0))
-
--- -- local rootConnection = Vec3(-17.5, -11.5, 0)
--- -- local rootConnection = Vec3(-35.5, -3.5, 0)
-
--- local SpiderLeftIK = ECS.entity(World)
--- 	:assemble(Assemblages.ik, SpiderHead, Vec3(-17.5, -11.5, 0), SpiderHipLeft, Vec3(-20.5, 18.5, -18.5), SpiderKneeLeft)
-
-
-local p = Vec3(0, 0, 0)
--- p:vaddi(o):vaddi(rootConnection):vaddi(Vec3(0, 0, 7.5))
-
-ECS.entity(World)
-	:assemble(Assemblages.prop, Point.image, Point.quads.red, p, Vec3(0, 0, 0), Vec3(0, 0, 0))
-
-	-- local SpiderHipRight = ECS.entity(World)
--- 	:assemble(Assemblages.prop, Spider.image, Spider.quads.hip, Vec3(100, 0, 20))
-
--- local SpiderKneeRight = ECS.entity(World)
--- 	:assemble(Assemblages.prop, Spider.image, Spider.quads.knee, Vec3(100, 0, 20))
+local P = ECS.entity(World)
+	:assemble(Assemblages.prop, Point.image, Point.quads.red, Vec3(0, 0, 0), Vec2(0, 0))
 
 function love.load()
 	World:emit("load")
@@ -115,38 +94,43 @@ function love.update(dt)
 
 	World:emit("update", dt)
 
-	-- local rootConnection = Vec3(-17.5, 7.5, 0)
-	-- do
-	-- 	local piv = Vec3():vset(SpiderHead.sprite.pivot)
-	-- 	local ix, iy, iw, ih = SpiderHead.sprite.quad:getViewport()
-	-- 	piv.z = piv.z + (piv.y/(ih/2) * ih/2)
-	-- 	SpiderHead.quadData:localToWorld(rootConnection, SpiderHead.transform.position, piv, SpiderHead.transform.rotation)
-	-- 	print(rootConnection)
-	-- 	-- print(rootConnection)
-	-- end
-	-- p:vset(rootConnection)
-	-- -- p:vset(SpiderHead.quadData.topLeft.position)
-	-- p.y = SpiderHead.transform.position.y
-	-- print(SpiderHead.transform.position.z)
-	-- p:ssubi(0, SpiderHead.transform.position.z * 2, 0)
-	-- p:ssubi(0, 0, 0)
+	local root = Vec2(-17.5, -11.5)
+	local hipJointEnd = Vec2(-20.5, -18.5)
+	local kneeJointEnd = Vec2(4, -18.5)
 
-	local pivotDiagonal = Vec3():vset(Player.sprite.pivotDiagonal)
-	local normalDiagonal = Vec3():vset(Player.quadData.diagonalNormal)
-	local origin = Vec3(0, -8, 0)
-	local out = Player.sprite:spriteToWorldSprite(origin)
-	local diagonalHipConnection = Vec3():vset(Player.quadData:localToWorldNoZ(out, Player.transform.position, pivotDiagonal, Player.transform.rotation, normalDiagonal))
-	-- print(out, diagonalHipConnection)
+	local hipJointLength = Vec2.distance(hipJointStart, hipJointEnd)
+	local kneeJointLength = Vec2.distance(kneeJointStart, kneeJointEnd)
+
+	local target = Vec3(100, 0, 50)
+	local distanceBetweenRootAndTarget = Vec2.distance(root, target)
+
+	local cosAngle0 = ((distanceBetweenRootAndTarget * distanceBetweenRootAndTarget) + (hipJointLength * hipJointLength) - (kneeJointLength * kneeJointLength)) / (2 * distanceBetweenRootAndTarget * hipJointLength);
+	local angle0 = math.acos(cosAngle0);
+	local cosAngle1 = ((kneeJointLength * kneeJointLength) + (hipJointLength * hipJointLength) - (distanceBetweenRootAndTarget * distanceBetweenRootAndTarget)) / (2 * kneeJointLength * hipJointLength);
+	local angle1 = math.acos(cosAngle1);
+	-- print(angle0)
+
+	do
+		local connectPoint = root
+		local p = SpiderHead.quadData:localPointTo3DPoint(connectPoint, SpiderHead.transform, SpiderHead.sprite)
+		SpiderHipLeft.transform.position:vset(p)
+	end
+
+	do
+		local connectPoint = hipJointEnd
+		local p = SpiderHipLeft.quadData:localPointTo3DPoint(connectPoint, SpiderHipLeft.transform, SpiderHipLeft.sprite)
+		SpiderKneeLeft.transform.position:vset(p)
+	end
 
 
-	-- local pivotDiagonal = Vec3():vset(Player.sprite.pivotDiagonal)
-	-- local normalDiagonal = Vec3():vset(Player.quadData.diagonalNormal)
-	-- local diagonalHipConnection = Vec3():vset(Player.quadData:localToWorldNoZ(origin, Player.transform.position, pivotDiagonal, Player.transform.rotation, normalDiagonal))
-	p:vset(diagonalHipConnection)
-	-- print(Player.quadData.flatNormal)
-	-- p:sset(-38, -11, 100)
+	-- SpiderHead.transform.rotation = love.timer.getTime()
+	SpiderHipLeft.transform.rotation = cosAngle0
+	SpiderKneeLeft.transform.rotation = cosAngle0
 
-	-- SpiderHead.transform.position = Vec3(0, 0, (math.sin(love.timer.getTime()) + 1) * 10 + 100)
+	SpiderHipLeft.transform.rotation = math.sin(love.timer.getTime() * 1.7) * 0.6
+	SpiderKneeLeft.transform.rotation = math.sin(love.timer.getTime() * 1.3) * 0.3
+
+	P.transform.position:vset(target):saddi(0, -90, 0)
 end
 
 function love.draw()

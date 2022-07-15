@@ -16,13 +16,7 @@ end
 
 function SyncQuadData:update(dt)
 	for _, e in ipairs(self.pool) do
-		if (e.sprite.kind == "PROP") then
-			e.quadData:updateWorldPositionsFromDiagonal(e.transform, e.sprite)
-		end
-
-		if (e.sprite.kind == "TILE") then
-			e.quadData:updateWorldPositionsFromFlat(e.transform, e.sprite)
-		end
+		e.quadData:updateWorldPositions(e.transform, e.sprite)
 	end
 end
 

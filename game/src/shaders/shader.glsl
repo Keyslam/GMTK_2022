@@ -34,7 +34,7 @@ vec4 effect(vec4 color, Image texture, vec2 texture_coords, vec2 screen_coords) 
 
 	if (currentDepth - 0.005 > closestDepth) {
 		float a = pixel.a;
-		pixel *= 0.9f;
+		pixel *= 0.7f;
 		pixel.a = a;
 	}
 
