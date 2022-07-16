@@ -5,5 +5,7 @@ local Controls = ECS.component("controls", function(e)
 	e.left = "a"
 	e.right = "d"
 
-	e.movementSpeed = 1000 -- TODO: Move this out? I don't think it belongs here
+	e.enabled = false
+
+	e.lastInput = nil
 end)

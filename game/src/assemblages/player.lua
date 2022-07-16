@@ -1,7 +1,8 @@
-return function(e, image, quad, position, pivot, gun)
+return function(e, image, quad, position, pivot)
 	return e
 	:assemble(Assemblages.prop, image, quad, position, pivot)
 	:give("controls")
-	:give("velocity", Vec3(0, 0, 0))
-	:give("attachment", gun, Vec3(-4, -3))
+	:give("dynamic")
+	:give("actions", 5, true)
+	:give("mapOccupation", {Vec2(0, 0)})
 end

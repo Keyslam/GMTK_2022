@@ -18,7 +18,9 @@
 		"CPML",
 		"TDRenderer",
 		"Vec2",
-		"Vec3"
+		"Vec3",
+		"Utils",
+		"CommandSequencer"
     ],
 
     "editor.tabSize": 4,

@@ -1,9 +1,9 @@
 love.graphics.setDefaultFilter("nearest", "nearest")
-local cursor = love.mouse.newCursor( "assets/crosshair.png", 12.5, 12.5)
-love.mouse.setCursor(cursor)
+love.mouse.setVisible(false)
 
 local SheetLoader = require("src.sheetLoader")
 local Batteries = require("lib.batteries")
+local MapBuilder = require("src.mapBuilder")
 
 ECS = require("lib.concord")
 Imgui = require("imgui")
@@ -11,6 +11,8 @@ Vector = require("lib.vector")
 CPML = require("lib.cpml")
 Peachy = require("lib.peachy")
 TDRenderer = require("src.tdrenderer")
+Utils = require("src.utils")
+CommandSequencer = require("src.commandSequencer")
 Vec3 = Batteries.vec3
 Vec2 = Batteries.vec2
 Assemblages = {}
@@ -22,62 +24,79 @@ ECS.utils.loadNamespace("src/assemblages", Assemblages)
 
 local World = ECS.world()
 
+World:setResource("collisionMap", {})
+
 World:addSystems(
 	Systems.controlsMovement,
-	Systems.velocityIntegration,
-	Systems.applyFriction,
+	Systems.createOrDestroyMoveIndicators,
+	Systems.mapOccupationSync,
 
 	Systems.cameraFollowing,
 
-	Systems.aimAtMouse,
-	Systems.aim,
-
 	Systems.syncQuadData,
-	Systems.attachmentFollowing,
 
 	Systems.updateAnimatedSprites,
 	Systems.spriteRendering
 )
 
+
 local Tilemap = SheetLoader:loadSheet("assets/tilemap.png", require("assets.tilemap"))
-local Point = SheetLoader:loadSheet("assets/point.png", require("assets.point"))
-local CountAndColours = love.graphics.newImage("assets/countAndColours.png")
-local img = love.graphics.newImage("assets/meeple.png")
-local q = love.graphics.newQuad(0, 0, 17, 18, 17, 18)
-
--- local Camera = ECS.entity(World)
--- 	:assemble(Assemblages.debugCamera)
-
-local Sun = ECS.entity(World)
-	:assemble(Assemblages.sun, Vec3(-123.802, 0.000, -223.610), Vec2(-15.337, 0.3), 640, 360)
-
-
-local Gun = ECS.entity(World)
-	:assemble(Assemblages.prop, Tilemap.image, Tilemap.quads.gun, Vec3(0, 0, 5), Vec2(-3, -1))
-	:give("aiming", Vec2(100, 0), Vec2(0, 0))
-	:give("aimAtMouse")
+local Cards = SheetLoader:loadSheet("assets/cards.png", require("assets.cards"))
+local Crosshairs = SheetLoader:loadSheet("assets/crosshairs.png", require("assets.crosshairs"))
+local Meeple = SheetLoader:loadSheet("assets/meeple.png", require("assets.meeple"))
 
 local Player = ECS.entity(World)
-	:assemble(Assemblages.player, img, q, Vec3(0, 0, 0), Vec2(0, -9), Gun)
+	:assemble(Assemblages.player, Meeple.image, Meeple.quads.idle, Vec3(0, 0, 0), Vec2(0, -9))
 
 local Camera = ECS.entity(World)
 	:assemble(Assemblages.camera, Vec3(0, 0, -500), Vec2(-math.pi, 0), 640, 360, nil, nil, Player)
 
-local Point = ECS.entity(World)
-	:assemble(Assemblages.tile, Point.image, Point.quads.red, Vec3(0, 0, 0.1), Vec2(0, 0))
+local Sun = ECS.entity(World)
+	:assemble(Assemblages.sun, Vec3(-123.802, 0.000, -223.610), Vec2(-15.337, 0.3), 640, 360)
+
+local Crosshair = ECS.entity(World)
+	:assemble(Assemblages.crosshair, Crosshairs.image, Crosshairs.quads.tile_1x1_valid, Vec3(0, 0, 0.1))
+
+-- local Dice = ECS.entity(World)
+-- 	:assemble(Assemblages.prop)
+
+local mapData = MapBuilder:build(30, 30)
+MapBuilder:populateECS(mapData, World)
+
+local state
+local states = {}
+
+function states.roll()
+	print("Waiting for roll input")
+	while ( not love.keyboard.isDown("space")) do
+		coroutine.yield()
+	end
+	print("Rolled")
+	local roll = love.math.random(1, 6)
+	print(roll)
+
+	state = CommandSequencer:enqueue(states.move, roll)
+end
+
+function states.move(actionAmount)
+	Player.actions:setShowIndicators(true)
+	Player.controls.enabled = true
+	Player.actions.amount = actionAmount
+	print("Waiting for moves")
+
+	while (Player.actions.amount > 0) do
+		coroutine.yield()
+	end
+
+	print("moved")
+
+	state = CommandSequencer:enqueue(states.roll)
+end
+
+CommandSequencer:enqueue(states.roll)
 
 function love.load()
 	World:emit("load")
-end
-
-for x = -10, 20 do
-	for y = -10, 20 do
-		local rand = love.math.random()
-		local quad = rand < 0.9 and Tilemap.quads.sand_1 or rand < 0.97 and Tilemap.quads.sand_2 or Tilemap.quads.sand_3
-
-		ECS.entity(World)
-			:assemble(Assemblages.tile, Tilemap.image, quad, Vec3(x * 16, y * 16, 0))
-	end
 end
 
 function love.update(dt)
@@ -97,17 +116,26 @@ function love.update(dt)
 	movementVector:smuli(dt)
 	Camera.transform.position:vaddi(movementVector)
 
+	CommandSequencer:update()
 	World:emit("update", dt)
 
-	local mx, my = love.mouse.getPosition()
-	mx = ((mx - (1920/2)) / 1920) * 640
-	my = ((my - (1080/2)) / 1080) * 360
-	mx = mx - Camera.transform.position.x
-	my = my * -1
-	my = my - Camera.transform.position.y
+	local cursorX, cursorY = love.mouse.getPosition()
+	cursorX = ((cursorX - (1920 / 2)) / 1920) * 640
+	cursorY = ((cursorY - (1080 / 2)) / 1080) * 360
+	cursorX = cursorX - Camera.transform.position.x
+	cursorY = cursorY * -1
+	cursorY = cursorY - Camera.transform.position.y
 
-	Point.transform.position:sset(mx, my, 0.1)
-	-- 	e.aiming.target = Vec2(mx, -my)
+	local tileX, tileY = Utils:worldToTile(cursorX, cursorY)
+
+	if ((tileX == 1 and tileY == 0) or (tileX == -1 and tileY == 0) or (tileX == 0 and tileY == 1) or (tileX == 0 and tileY == -1)) then
+		Crosshair.sprite.quad = Crosshairs.quads.tile_1x1_valid
+	else
+		Crosshair.sprite.quad = Crosshairs.quads.tile_1x1_invalid
+	end
+
+	local worldX, worldY = Utils:tileToWorld(tileX, tileY)
+	Crosshair.transform.position:sset(worldX, worldY, 0.1)
 end
 
 function love.draw()

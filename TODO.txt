@@ -1,12 +1,9 @@
-[x] Camera following
-[x] Camera space to world space
-[x] Crosshair
-[ ] Gun aim towards mouse
-[ ] Setup colliders (HC)
+[x] Shower
+[x] Bring back walls
+[x] Unable to move into walls
+[-] Indicator flood fill thing
+[x] Camera smoothing
+
 [ ] Sun follow camera
-[ ] Fix Crosshair
-[ ] Bullets exist
-[ ] Bullets shoot from gun
-[ ] Walls exist
-[ ] Walls block movement
-[ ] Bullets die when hitting wall
+
+[ ] Setup "Dice roll => Movement => Repeat" loop 

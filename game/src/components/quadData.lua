@@ -61,9 +61,13 @@ function QuadData:localPointTo3DPoint(p, transform, sprite)
 	return self:flatPointTo3DPoint(tempP, transform, sprite)
 end
 
+function QuadData:localPointTo3DPointWithZ(p, transform, sprite)
+	return self:localPointTo3DPoint(p, transform, sprite):saddi(0, transform.position.z, 0)
+end
+
 function QuadData:updateWorldPositions(transform, sprite)
-	self.topLeft.worldPosition:vset(self:localPointTo3DPoint(self.topLeft.localPosition, transform, sprite))
-	self.topRight.worldPosition:vset(self:localPointTo3DPoint(self.topRight.localPosition, transform, sprite))
-	self.bottomLeft.worldPosition:vset(self:localPointTo3DPoint(self.bottomLeft.localPosition, transform, sprite))
-	self.bottomRight.worldPosition:vset(self:localPointTo3DPoint(self.bottomRight.localPosition, transform, sprite))
+	self.topLeft.worldPosition:vset(self:localPointTo3DPointWithZ(self.topLeft.localPosition, transform, sprite))
+	self.topRight.worldPosition:vset(self:localPointTo3DPointWithZ(self.topRight.localPosition, transform, sprite))
+	self.bottomLeft.worldPosition:vset(self:localPointTo3DPointWithZ(self.bottomLeft.localPosition, transform, sprite))
+	self.bottomRight.worldPosition:vset(self:localPointTo3DPointWithZ(self.bottomRight.localPosition, transform, sprite))
 end

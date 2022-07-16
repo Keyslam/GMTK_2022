@@ -1,58 +1,85 @@
-local Tilemap = {
-	sand_1 = {
+local Tilemap_New = {
+	checker_red = {
 		x = 0,
-		y = 68,
-		w = 16,
-		h = 16,
+		y = 0,
+		w = 32,
+		h = 32
 	},
-	sand_2 = {
-		x = 17,
-		y = 68,
-		w = 16,
-		h = 16,
+	checker_blue = {
+		x = 33,
+		y = 0,
+		w = 32,
+		h = 32
 	},
-	sand_3 = {
-		x = 102,
-		y = 51,
-		w = 16,
-		h = 16,
+	checker_0_0 = {
+		x = 33,
+		y = 33,
+		w = 32,
+		h = 32
 	},
-	wizard = {
+
+	warning = {
 		x = 0,
-		y = 119,
-		w = 16,
-		h = 16,
+		y = 33,
+		w = 32,
+		h = 32
 	},
-	chest_closed = {
-		x = 85,
-		y = 119,
-		w = 16,
-		h = 16,
+
+	card = {
+		x = 0,
+		y = 66,
+		w = 32,
+		h = 52
 	},
-	chest_opening = {
-		x = 102,
-		y = 119,
-		w = 16,
-		h = 16,
+
+	wall_left = {
+		x = 66,
+		y = 0,
+		w = 32,
+		h = 32
 	},
-	chest_open = {
-		x = 119,
-		y = 119,
-		w = 16,
-		h = 16,
+
+	wall_right = {
+		x = 99,
+		y = 0,
+		w = 32,
+		h = 32
 	},
-	chest_open_trap = {
-		x = 136,
-		y = 119,
-		w = 16,
-		h = 16,
+
+	wall_middle = {
+		x = 132,
+		y = 0,
+		w = 32,
+		h = 32
 	},
-	gun = {
-		x = 85,
-		y = 137,
-		w = 16,
-		h = 16,
-	}
+
+	wall_single = {
+		x = 165,
+		y = 0,
+		w = 32,
+		h = 32
+	},
+
+	wall_top_left = {
+		x = 198,
+		y = 0,
+		w = 32,
+		h = 32
+	},
+
+	wall_top_middle = {
+		x = 231,
+		y = 0,
+		w = 32,
+		h = 32
+	},
+
+	wall_top_right = {
+		x = 264,
+		y = 0,
+		w = 32,
+		h = 32
+	},
 }
 
-return Tilemap
+return Tilemap_New

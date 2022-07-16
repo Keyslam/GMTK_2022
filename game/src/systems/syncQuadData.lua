@@ -1,12 +1,16 @@
 local SyncQuadData = ECS.system({
 	eligible = { "transform", "sprite"},
-	pool = { "transform", "sprite", "quadData" }
+	staticPool = { "transform", "sprite", "quadData", "!dynamic" },
+	dynamicPool = { "transform", "sprite", "quadData", "dynamic" }
 })
 
 function SyncQuadData:init()
 	self.eligible.onAdded = function(_, e)
 		e:give("quadData")
 		e.quadData:buildLocalData(e.sprite)
+
+		e.quadData:updateWorldPositions(e.transform, e.sprite)
+		e.quadData:updateUvs(e.sprite)
 	end
 
 	self.eligible.onRemoved = function(_, e)
@@ -15,7 +19,7 @@ function SyncQuadData:init()
 end
 
 function SyncQuadData:update(dt)
-	for _, e in ipairs(self.pool) do
+	for _, e in ipairs(self.dynamicPool) do
 		e.quadData:updateWorldPositions(e.transform, e.sprite)
 		e.quadData:updateUvs(e.sprite)
 	end
