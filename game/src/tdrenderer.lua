@@ -102,57 +102,65 @@ function TDRenderer:drawMeshes()
 	end
 end
 
+function TDRenderer:updateAxis(cam)
+	cam.direction = Vec3(
+		math.cos(cam.rotation.y) * math.sin(cam.rotation.x),
+		math.sin(cam.rotation.y),
+		math.cos(cam.rotation.y) * math.cos(cam.rotation.x)
+	)
+
+	cam.right = Vec3(
+		math.sin(cam.rotation.x - math.pi / 2),
+		0,
+		math.cos(cam.rotation.x - math.pi / 2)
+	)
+
+	cam.forward = Vec3(
+		math.sin(cam.rotation.x + math.pi),
+		0,
+		math.cos(cam.rotation.x + math.pi)
+	)
+
+	cam.up = Vec3.cross(cam.right, cam.direction)
+end
+
 function TDRenderer:renderScene(camera, sun)
-	camera.tdRotation:updateAxis()
-	sun.tdRotation:updateAxis()
+	self:updateAxis(camera)
+	self:updateAxis(sun)
 
 	local ViewMatrix = CPML.mat4()
 
-	local _cameraEye = camera.transform.position
+	local _cameraEye = camera.position
 	local cameraEye = CPML.vec3(_cameraEye.x, _cameraEye.y, _cameraEye.z)
 
-	-- cameraEye.x = math.floor(cameraEye.x)
-	-- cameraEye.y = math.floor(cameraEye.y)
-	-- cameraEye.z = math.floor(cameraEye.z)
-
-
-	local _cameraCenter = camera.transform.position:vadd(camera.tdRotation.direction)
+	local _cameraCenter = camera.position:vadd(camera.direction)
 	local cameraCenter = CPML.vec3(_cameraCenter.x, _cameraCenter.y, _cameraCenter.z)
 
-	local _cameraUp = camera.tdRotation.up
+	local _cameraUp = camera.up
 	local cameraUp = CPML.vec3(_cameraUp.x, _cameraUp.y, _cameraUp.z)
 
 	ViewMatrix:look_at(ViewMatrix, cameraEye, cameraCenter, cameraUp)
 	ViewMatrix:translate(ViewMatrix, cameraEye)
 
-	-- local pos = CPML.vec3(camera.transform.position.x, camera.transform.position.y, camera.transform.position.z)
-	-- pos.x = math.floor(pos.x)
-	-- pos.y = math.floor(pos.y)
-	-- pos.z = math.floor(pos.z)
-
-	-- ViewMatrix:look_at(ViewMatrix, pos, pos + camera.transform.direction,
-	-- 	camera.transform.up)
-	-- ViewMatrix:translate(ViewMatrix, pos)
-
 	Shader:send("view_matrix", "column", ViewMatrix)
-	Shader:send("projection_matrix", "column", camera.projection.value)
+	Shader:send("projection_matrix", "column", camera.projection)
 
 	local SunViewMatrix = CPML.mat4()
 
-	local _sunEye = sun.transform.position
+	local _sunEye = sun.position
 	local sunEye = CPML.vec3(_sunEye.x, _sunEye.y, _sunEye.z)
 
-	local _sunCenter = sun.transform.position:vadd(sun.tdRotation.direction)
+	local _sunCenter = sun.position:vadd(sun.direction)
 	local sunCenter = CPML.vec3(_sunCenter.x, _sunCenter.y, _sunCenter.z)
 
-	local _sunUp = sun.tdRotation.up
+	local _sunUp = sun.up
 	local sunUp = CPML.vec3(_sunUp.x, _sunUp.y, _sunUp.z)
 
 	SunViewMatrix:look_at(SunViewMatrix, sunEye, sunCenter, sunUp)
 	SunViewMatrix:translate(SunViewMatrix, sunEye)
 
 	Shader:send("lightSpace_view_matrix", "column", SunViewMatrix)
-	Shader:send("lightSpace_projection_matrix", "column", sun.projection.value)
+	Shader:send("lightSpace_projection_matrix", "column", sun.projection)
 	Shader:send("shadowmap", Shadowmap.depth)
 
 	love.graphics.setShader(Shader)
@@ -169,24 +177,24 @@ function TDRenderer:renderScene(camera, sun)
 end
 
 function TDRenderer:renderShadowmap(sun)
-	sun.tdRotation:updateAxis()
+	self:updateAxis(sun)
 
 	local ViewMatrix = CPML.mat4()
 
-	local _eye = sun.transform.position
+	local _eye = sun.position
 	local eye = CPML.vec3(_eye.x, _eye.y, _eye.z)
 
-	local _center = sun.transform.position:vadd(sun.tdRotation.direction)
+	local _center = sun.position:vadd(sun.direction)
 	local center = CPML.vec3(_center.x, _center.y, _center.z)
 
-	local _up = sun.tdRotation.up
+	local _up = sun.up
 	local up = CPML.vec3(_up.x, _up.y, _up.z)
 
 	ViewMatrix:look_at(ViewMatrix, eye, center, up)
 	ViewMatrix:translate(ViewMatrix, eye)
 
 	ShadowShader:send("view_matrix", "column", ViewMatrix)
-	ShadowShader:send("projection_matrix", "column", sun.projection.value)
+	ShadowShader:send("projection_matrix", "column", sun.projection)
 
 	love.graphics.setShader(ShadowShader)
 	love.graphics.setColor(1, 1, 1)

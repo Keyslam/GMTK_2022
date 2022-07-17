@@ -13,14 +13,19 @@
 	],
     "Lua.diagnostics.globals": [
         "love",
-        "ECS",
-		"Assemblages",
+        "Batteries",
 		"CPML",
-		"TDRenderer",
-		"Vec2",
-		"Vec3",
+		"Class",
+		"Peachy",
 		"Utils",
-		"CommandSequencer"
+		"Vec3",
+		"Vec2",
+		"Scheduler",
+		"TDRenderer",
+		"SheetLoader",
+		"GameWidth",
+		"GameHeight",
+		"Flux"
     ],
 
     "editor.tabSize": 4,

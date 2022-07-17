@@ -1,9 +1,11 @@
-[x] Shower
-[x] Bring back walls
-[x] Unable to move into walls
-[-] Indicator flood fill thing
-[x] Camera smoothing
-
+[x] Walls exist
+[x] Walls block movement
+[x] Movement indicator
+[ ] Camera follow player
 [ ] Sun follow camera
 
-[ ] Setup "Dice roll => Movement => Repeat" loop 
+[ ] Basic enemy
+[ ] Enemy gets to do turns
+[ ] Pawn enemy
+[ ] You can kill enemy
+[ ] Enemy can kill you

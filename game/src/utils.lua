@@ -14,6 +14,25 @@ function Utils:tileToWorld(x, y)
 	return x, y
 end
 
+function Utils:vWorldToTile(v)
+	local out = Vec2(0, 0)
+	out.x, out.y = self:worldToTile(v.x, v.y)
+
+	return out
+end
+
+function Utils:vTileToWorld(v)
+	local out = Vec2(0, 0)
+	out.x, out.y = self:vTileToWorld(v.x, v.y)
+
+	return out
+end
+
+function Utils:wrap(x, x_min, x_max)
+	x_max = x_max + 1
+	return (((x - x_min) % (x_max - x_min)) + (x_max - x_min)) % (x_max - x_min) + x_min;
+ end
+
 function Utils:lerp(v0, v1, t)
     return v0*(1-t)+v1*t
 end

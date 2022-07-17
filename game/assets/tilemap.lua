@@ -80,6 +80,13 @@ local Tilemap_New = {
 		w = 32,
 		h = 32
 	},
+
+	player = {
+		x = 0,
+		y = 130,
+		w = 18,
+		h = 31,
+	}
 }
 
 return Tilemap_New
