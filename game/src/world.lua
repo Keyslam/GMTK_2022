@@ -53,6 +53,7 @@ end
 local Enemies = {
 	require("src.objects.pawnBlack"),
 	require("src.objects.pawnWhite"),
+	require("src.objects.knight"),
 	require("src.objects.bishop"),
 	require("src.objects.rook"),
 	require("src.objects.queen"),

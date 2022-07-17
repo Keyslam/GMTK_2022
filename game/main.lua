@@ -441,7 +441,7 @@ function states.enemiesTurn()
 	end
 	spawnpoints = {}
 
-	local doSpawn = turn % 3 == 0
+	local doSpawn = turn % 1 == 0
 	if (doSpawn) then
 		local x, y
 		while (true) do

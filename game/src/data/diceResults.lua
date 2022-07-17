@@ -45,19 +45,19 @@ local DiceResult = {
 			multiplier = 1,
 		},
 		seven = {
-			quad = nil,
+			quad = Dice.quads.value_seven,
 			value = 7,
 			rerolls = 0,
 			multiplier = 1,
 		},
 		eight = {
-			quad = nil,
+			quad = Dice.quads.value_eight,
 			value = 8,
 			rerolls = 0,
 			multiplier = 1,
 		},
 		nine = {
-			quad = nil,
+			quad = Dice.quads.value_nine,
 			value = 9,
 			rerolls = 0,
 			multiplier = 1,

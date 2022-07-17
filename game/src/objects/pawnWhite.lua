@@ -33,15 +33,15 @@ local function performTurn(self)
 
 	if (self.occupationMap:atOfType(tilePosition:sadd(-1, 1), "isPlayer")) then
 		local move = self.position:sadd(-32, 32, 0)
-		Scheduler:waitForP(self:moveTo(move, 0, 0.35))
+		Scheduler:waitForP(self:moveTo(move, 0, 0.15))
 	elseif (self.occupationMap:atOfType(tilePosition:sadd(1, 1), "isPlayer")) then
 		local move = self.position:sadd(32, 32, 0)
-		Scheduler:waitForP(self:moveTo(move, 0, 0.35))
+		Scheduler:waitForP(self:moveTo(move, 0, 0.15))
 	elseif (self.occupationMap:at(tilePosition:sadd(0, 1))) then
 
 	else
 		local move = self.position:sadd(0, 32, 0)
-		Scheduler:waitForP(self:moveTo(move, 0, 0.35))
+		Scheduler:waitForP(self:moveTo(move, 0, 0.1))
 	end
 
 	self:updateAttackIndicators()

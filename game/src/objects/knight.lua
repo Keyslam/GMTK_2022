@@ -71,7 +71,7 @@ local function performTurn(self)
 	end
 
 	if (targetPos) then
-		Scheduler:waitForP(self:moveTo(Utils:vTileToWorld(targetPos), 0, 0.35))
+		Scheduler:waitForP(self:moveTo(Utils:vTileToWorld(targetPos), 0, 0.15))
 	end
 
 	self:updateAttackIndicators()
