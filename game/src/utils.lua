@@ -23,7 +23,7 @@ end
 
 function Utils:vTileToWorld(v)
 	local out = Vec2(0, 0)
-	out.x, out.y = self:vTileToWorld(v.x, v.y)
+	out.x, out.y = self:tileToWorld(v.x, v.y)
 
 	return out
 end

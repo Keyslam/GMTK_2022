@@ -6,19 +6,19 @@ function OccupationMap:initialize()
 end
 
 function OccupationMap:add(object, position)
-	local x, y = position.x, position.y
+	local tileX, tileY = position.x, position.y
 
-	if (not self.map[x]) then
-		self.map[x] = {}
+	if (not self.map[tileX]) then
+		self.map[tileX] = {}
 	end
-	self.map[x][y] = object
+	self.map[tileX][tileY] = object
 
 	self.objects[object] = position:copy()
 end
 
 function OccupationMap:update(object, position)
 	local oldPosition = self.objects[object]
-	local oldX, oldY = Utils:worldToTile(oldPosition.x, oldPosition.y)
+	local oldX, oldY = oldPosition.x, oldPosition.y
 	local x, y = position.x, position.y
 
 	self.map[oldX][oldY] = nil
@@ -28,16 +28,17 @@ function OccupationMap:update(object, position)
 	end
 	self.map[x][y] = object
 
-	self.objects[object] = Vec2:vset(object.position)
+	self.objects[object]:sset(position.x, position.y)
 end
 
-function OccupationMap:remove(object, position)
-	local x, y = position.x, position.y
+function OccupationMap:remove(object)
+	local oldPosition = self.objects[object]
+	local oldX, oldY = oldPosition.x, oldPosition.y
 
-	if (not self.map[x]) then
-		self.map[x] = {}
+	if (not self.map[oldX]) then
+		self.map[oldX] = {}
 	end
-	self.map[x][y] = nil
+	self.map[oldX][oldY] = nil
 
 	self.objects[object] = nil
 end

@@ -1,11 +1,13 @@
-[x] Walls exist
-[x] Walls block movement
-[x] Movement indicator
-[ ] Camera follow player
-[ ] Sun follow camera
-
-[ ] Basic enemy
-[ ] Enemy gets to do turns
-[ ] Pawn enemy
-[ ] You can kill enemy
-[ ] Enemy can kill you
+[-] Audio manager thing
+[x] Make player bonkable by enemies.
+[x] Death screen
+[x] Menu
+[x] Sun follow camera
+[ ] Add tons of enemies
+	[x] Knight: Moves in L shape
+	[ ] Bishop: Moves diagonally, infinitely
+	[ ] Rook: Moves laterally, infinitely
+	[ ] Battleship: Shoots near the player
+[ ] Add dice upgrading. Figure out the mechanics
+[ ] Build the map
+[ ] Enemy spawning thing

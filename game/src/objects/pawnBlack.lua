@@ -45,6 +45,12 @@ local function performTurn(self)
 	end
 
 	self:updateAttackIndicators()
+	self.occupationMap:update(self, Utils:vWorldToTile(self.position))
+end
+
+function PawnBlack:die(offset)
+	self.occupationMap:remove(self)
+	return Enemy.die(self, offset)
 end
 
 function PawnBlack:performTurn()
@@ -52,7 +58,6 @@ function PawnBlack:performTurn()
 end
 
 function PawnBlack:update(dt)
-	self.occupationMap:update(self, Utils:vWorldToTile(self.position))
 end
 
 function PawnBlack:draw()

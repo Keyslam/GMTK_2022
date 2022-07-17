@@ -13,6 +13,7 @@ function PawnWhite:initialize(position, occupationMap)
 	self.rotation = 0
 	self.sprite = StandingSprite(Chess.image, Chess.quads.pawn_white, position, 0)
 	self.occupationMap = occupationMap
+	self.occupationMap:add(self, Utils:vWorldToTile(self.position))
 
 	self.indicators = {
 		upLeft = AttackIndicator(self.position),
@@ -44,6 +45,15 @@ local function performTurn(self)
 	end
 
 	self:updateAttackIndicators()
+	self.occupationMap:update(self, Utils:vWorldToTile(self.position))
+end
+
+function PawnWhite:die(offset)
+	self.occupationMap:remove(self)
+	return Enemy.die(self, offset)
+end
+
+function PawnWhite:update(dt)
 end
 
 function PawnWhite:performTurn()

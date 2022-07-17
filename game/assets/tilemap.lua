@@ -53,30 +53,94 @@ local Tilemap_New = {
 		h = 32
 	},
 
-	wall_single = {
+	wall_top_left_short = {
 		x = 165,
 		y = 0,
 		w = 32,
 		h = 32
 	},
 
-	wall_top_left = {
+	wall_top_right_short = {
 		x = 198,
 		y = 0,
 		w = 32,
 		h = 32
 	},
 
-	wall_top_middle = {
+	wall_top_left_long = {
 		x = 231,
 		y = 0,
 		w = 32,
 		h = 32
 	},
 
-	wall_top_right = {
+	wall_top_right_long = {
 		x = 264,
 		y = 0,
+		w = 32,
+		h = 32
+	},
+
+	wall_top_corner_left_small = {
+		x = 297,
+		y = 0,
+		w = 32,
+		h = 32
+	},
+
+	wall_top_corner_right_small = {
+		x = 330,
+		y = 0,
+		w = 32,
+		h = 32
+	},
+
+	wall_top_corner_bottom_left_small = {
+		x = 297,
+		y = 33,
+		w = 32,
+		h = 32
+	},
+
+	wall_top_corner_bottom_right_small = {
+		x = 330,
+		y = 33,
+		w = 32,
+		h = 32
+	},
+
+
+	wall_top_corner_left_big = {
+		x = 165,
+		y = 33,
+		w = 32,
+		h = 32
+	},
+
+	wall_top_corner_right_big = {
+		x = 231,
+		y = 33,
+		w = 32,
+		h = 32
+	},
+
+	wall_top_middle = {
+		x = 198,
+		y = 33,
+		w = 32,
+		h = 32
+	},
+
+	wall_top = {
+		x = 264,
+		y = 33,
+		w = 32,
+		h = 32
+	},
+
+	floor_dice = {
+		x = 99,
+		y = 33,
 		w = 32,
 		h = 32
 	},

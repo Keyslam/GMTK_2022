@@ -2,6 +2,7 @@ local Entity = require("src.objects.entity")
 local StandingSprite = require("src.objects.standingSprite")
 local MovementIndicator = require("src.objects.movementIndicator")
 
+local dieSound = love.audio.newSource("assets/sfx/metal_hit-bounce-1.wav", "static")
 local MoveSounds = {
 	love.audio.newSource("assets/sfx/move1-bounce-4.wav", "stream"),
 	love.audio.newSource("assets/sfx/move2-bounce-4.wav", "stream"),
@@ -49,7 +50,7 @@ function Player:updateMovementIndicators()
 end
 
 function Player:update(dt)
-	self.occupationMap:update(self, Utils:vWorldToTile(self.position))
+	
 end
 
 local function addDice(self, diceData)
@@ -239,7 +240,12 @@ local function moveTo(self, targetPosition, rotation, time)
 		if (tilePosition.x == targetTilePosition.x and tilePosition.y == targetTilePosition.y) then
 			if (self.occupationMap:atOfType(tilePosition, "isEnemy")) then
 				local enemy = self.occupationMap:at(tilePosition)
-				enemy:die()
+
+				if (self.position.x < enemy.position.x) then
+					enemy:die(32)
+				else
+					enemy:die(-32)
+				end
 			end
 
 			break
@@ -255,29 +261,45 @@ local function moveTo(self, targetPosition, rotation, time)
 	self.rotation = rotation
 
 	self:updateMovementIndicators()
+	self.occupationMap:update(self, Utils:vWorldToTile(self.position))
 end
 
 function Player:moveTo(targetPosition, rotation, time)
 	return Scheduler:enqueue(moveTo, self, targetPosition, rotation, time)
 end
 
+local function die(self, offset)
+	dieSound:setPitch(love.math.random(95, 105)/100)
+	dieSound:play()
+
+	local startPosition = self.position:copy()
+	Flux.to(self, 1, {rotation = -math.pi/4}):ease("quadout")
+	Scheduler:waitForFlux(Flux.to(self.position, 0.3, {x = startPosition.x + offset}):ease("linear"))
+
+	transition("DEAD")
+end
+
+function Player:die(offset)
+	return Scheduler:waitFor(die, self, offset)
+end
+
 function Player:keypressed(key)
 	if (self.turnsLeft > 0 and not self.moving) then
 		local dx, dy = 0, 0
 
-		if (love.keyboard.isDown("w")) then
+		if (love.keyboard.isDown("w") or love.keyboard.isDown("up")) then
 			dy = 32
 		end
 
-		if (love.keyboard.isDown("a")) then
+		if (love.keyboard.isDown("a") or love.keyboard.isDown("left")) then
 			dx = -32
 		end
 
-		if (love.keyboard.isDown("s")) then
+		if (love.keyboard.isDown("s") or love.keyboard.isDown("down")) then
 			dy = -32
 		end
 
-		if (love.keyboard.isDown("d")) then
+		if (love.keyboard.isDown("d") or love.keyboard.isDown("right")) then
 			dx = 32
 		end
 
