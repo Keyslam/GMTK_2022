@@ -1,5 +1,10 @@
 love.graphics.setDefaultFilter("nearest", "nearest")
 
+dicetile = 1
+
+local spawnpoints = {}
+
+
 local rollSounds = {
 	love.audio.newSource("assets/sfx/roll-bounce-1.wav", "static"),
 	love.audio.newSource("assets/sfx/roll-bounce-2.wav", "static"),
@@ -8,45 +13,52 @@ local rollSounds = {
 	love.audio.newSource("assets/sfx/roll-bounce-5.wav", "static"),
 }
 
-local gameState = "GAME"
+local collectSound = love.audio.newSource("assets/sfx/dice_pickup-bounce-1.wav", "static")
+local upgradeSound = love.audio.newSource("assets/sfx/dice_upgrade-bounce-2.wav", "static")
+
+local gameState = "MENU"
 
 local menuBackground = love.graphics.newImage("assets/menu_background.png")
 menuBackground:setWrap("repeat", "repeat")
-local menuBackgroundQuad = love.graphics.newQuad(0, 0, 640, 360, 640, 384)
-local menuCursorPos = 1
-local won = false
+	local menuBackgroundQuad = love.graphics.newQuad(0, 0, 640, 360, 640, 384)
+	local menuCursorPos = 1
+	local won = false
+	
+	local music_menu = love.audio.newSource("assets/music_menu.mp3", "stream")
+	music_menu:setLooping(true)
+	music_menu:play()
+	
+	local music_main = love.audio.newSource("assets/music_main.mp3", "stream")
+	music_main:setLooping(true)
+	
 
-local music_menu = love.audio.newSource("assets/music_menu.mp3", "stream")
-music_menu:setLooping(true)
--- music_menu:play()
-
-local music_main = love.audio.newSource("assets/music_main.mp3", "stream")
-music_main:setLooping(true)
-
-
-GameWidth, GameHeight = 640, 360
-
-Batteries = require("lib.batteries")
-CPML = require("lib.cpml")
-Class = require("lib.middleclass")
-Peachy = require("lib.peachy")
-Flux = require("lib.flux")
-Utils = require("src.utils")
-Vec3 = Batteries.vec3
-Vec2 = Batteries.vec2
-
-SheetLoader = require("src.sheetLoader")
-Scheduler = require("src.scheduler")
-TDRenderer = require("src.tdrenderer")
-
-local World = require("src.world")
-local DicePanel = require("src.objects.dicePanel")
-local DiceRoller = require("src.objects.diceRoller")
-local StandingSprite = require("src.objects.standingSprite")
-
-local Dice = require("src.data.dice")
-local DiceSheet = SheetLoader:loadSheet("assets/dice.png", require("assets.dice"))
-
+	GameWidth, GameHeight = 640, 360
+	
+	Batteries = require("lib.batteries")
+	CPML = require("lib.cpml")
+	Class = require("lib.middleclass")
+	Peachy = require("lib.peachy")
+	Flux = require("lib.flux")
+	Utils = require("src.utils")
+	Vec3 = Batteries.vec3
+	Vec2 = Batteries.vec2
+	
+	SheetLoader = require("src.sheetLoader")
+	Scheduler = require("src.scheduler")
+	TDRenderer = require("src.tdrenderer")
+	
+	local World = require("src.world")
+	local DicePanel = require("src.objects.dicePanel")
+	local DiceRoller = require("src.objects.diceRoller")
+	local StandingSprite = require("src.objects.standingSprite")
+	local InfoPanel = require("src.objects.infoPanel")
+	infoPanel = InfoPanel()
+	
+	local Dice = require("src.data.dice")
+	local DiceSheet = SheetLoader:loadSheet("assets/dice.png", require("assets.dice"))
+	local CrosshairSheet = SheetLoader:loadSheet("assets/crosshairs.png", require("assets.crosshairs"))
+	
+	local FlatSprite = require("src.objects.flatSprite")
 local FontTitle = love.graphics.newFont("assets/FutilePro.ttf", 48)
 local FontMenuItems = love.graphics.newFont("assets/FutilePro.ttf", 32)
 local FontSmall = love.graphics.newFont("assets/FutilePro.ttf", 16)
@@ -56,13 +68,13 @@ local Cards = SheetLoader:loadSheet("assets/cards.png", require("assets.cards"))
 local Crosshairs = SheetLoader:loadSheet("assets/crosshairs.png", require("assets.crosshairs"))
 local Meeple = SheetLoader:loadSheet("assets/meeple.png", require("assets.meeple"))
 
-local menuData = {hideProgress = 0, transitioning = false}
+local menuData = { hideProgress = 0, transitioning = false }
 local function hide()
-	Scheduler:waitForFlux(Flux.to(menuData, 1, {hideProgress = 1}):ease("quadout"))
+	Scheduler:waitForFlux(Flux.to(menuData, 1, { hideProgress = 1 }):ease("quadout"))
 end
 
 local function show()
-	Scheduler:waitForFlux(Flux.to(menuData, 1, {hideProgress = 0}):ease("quadout"))
+	Scheduler:waitForFlux(Flux.to(menuData, 1, { hideProgress = 0 }):ease("quadout"))
 end
 
 function transition(newState)
@@ -78,9 +90,7 @@ function transition(newState)
 	end
 	gameState = newState
 
-	print(newState)
 	if (newState == "GAME") then
-		print("yeee")
 		music_main:play()
 	else
 		music_menu:play()
@@ -90,16 +100,17 @@ function transition(newState)
 	menuData.transitioning = false
 end
 
-
 local UICanvas = love.graphics.newCanvas(GameWidth, GameHeight)
 
 local dicePanel = DicePanel()
 local diceRoller = DiceRoller()
 World:build(30, 30)
 
+local turn = 0
+
 local Camera = {
-	position = Vec3(0, 0, -500),
-	realPosition = Vec3(0, 0, -500),
+	position = Vec3(20 * 32, 16 * 32, -500),
+	realPosition = Vec3(20 * 32, 16 * 32, -500),
 	rotation = Vec2(-math.pi, 0),
 	projection = CPML.mat4.from_ortho(
 		-GameWidth / 2, GameWidth / 2,
@@ -136,8 +147,8 @@ local Sun = {
 	position = SunStart,
 	rotation = Vec2(-15.337, 0.3),
 	projection = CPML.mat4.from_ortho(
-		-GameWidth/2, GameWidth/2,
-		-GameHeight/2, GameHeight/2,
+		-GameWidth / 2, GameWidth / 2,
+		-GameHeight / 2, GameHeight / 2,
 		0.1, 1000
 	)
 }
@@ -162,21 +173,38 @@ end
 local state
 local states = {}
 
+local unlockable = { 2, 3, 4, 6}
+local availableDice = {
+	{
+		kind = Dice[5],
+		level = 1,
+	},
+	{
+		kind = Dice[1],
+		level = 1,
+	}
+}
+local upgradeable = { availableDice[1], availableDice[2] }
+
 local diceIndex = 1
 function states.roll()
-	Scheduler:waitForP(dicePanel:show(Dice[diceIndex], Dice[diceIndex].levels[1]))
+	diceIndex = Utils:wrap(diceIndex - 1, 1, #availableDice)
+	local selectedDice = availableDice[diceIndex]
+	Scheduler:waitForP(dicePanel:show(selectedDice.kind, selectedDice.kind.levels[selectedDice.level]))
 
 	while (true) do
 		local input = Scheduler:waitFor(getInput)
 
 		if (input == "a" or input == "left") then
-			diceIndex = Utils:wrap(diceIndex - 1, 1, #Dice)
-			Scheduler:waitForP(dicePanel:changeLeft(Dice[diceIndex], Dice[diceIndex].levels[1]))
+			diceIndex = Utils:wrap(diceIndex - 1, 1, #availableDice)
+			local selectedDice = availableDice[diceIndex]
+			Scheduler:waitForP(dicePanel:changeLeft(selectedDice.kind, selectedDice.kind.levels[selectedDice.level]))
 		end
 
 		if (input == "d" or input == "right") then
-			diceIndex = Utils:wrap(diceIndex + 1, 1, #Dice)
-			Scheduler:waitForP(dicePanel:changeRight(Dice[diceIndex], Dice[diceIndex].levels[1]))
+			diceIndex = Utils:wrap(diceIndex + 1, 1, #availableDice)
+			local selectedDice = availableDice[diceIndex]
+			Scheduler:waitForP(dicePanel:changeRight(selectedDice.kind, selectedDice.kind.levels[selectedDice.level]))
 		end
 
 		if (input == "space") then
@@ -187,7 +215,8 @@ function states.roll()
 	local toRoll = {}
 	local rolled = {}
 
-	local diceSet = Dice[diceIndex].levels[1]
+	local selectedDice = availableDice[diceIndex]
+	local diceSet = selectedDice.kind.levels[selectedDice.level]
 	for i = 1, #diceSet do
 		local diceData = {
 			sprite = StandingSprite(DiceSheet.image, DiceSheet.quads.value_zero, Vec3(0, 0, 0), 0),
@@ -207,7 +236,7 @@ function states.roll()
 
 		if (input == "space") then
 			local i = love.math.random(1, #rollSounds)
-			rollSounds[i]:setPitch(love.math.random(95, 100)/100)
+			rollSounds[i]:setPitch(love.math.random(95, 100) / 100)
 			rollSounds[i]:play()
 
 			local toAdd = 0
@@ -285,7 +314,7 @@ function states.roll()
 	-- -- 	coroutine.yield()
 	-- -- end
 
-	
+
 
 
 
@@ -309,6 +338,91 @@ function states.move(actionAmount)
 	end
 	Scheduler:waitForP(World.player:hideResultDice())
 
+	do
+		local tilePosition = Utils:vWorldToTile(World.player.position)
+
+		local yes = false
+		if (dicetile == 1 and tilePosition.x == 16 and tilePosition.y == 16) then
+			yes = true
+		end
+		if (dicetile == 2 and tilePosition.x == 37 and tilePosition.y == 16) then
+			yes = true
+		end
+		if (dicetile == 3 and tilePosition.x == 16 and tilePosition.y == 32) then
+			yes = true
+		end
+		if (dicetile == 4 and tilePosition.x == 37 and tilePosition.y == 32) then
+			yes = true
+		end
+
+		if (yes) then
+			local collect = false
+			local name = nil
+
+			if (#unlockable > 0 and love.math.random() > 0.3) then
+				local i = love.math.random(1, #unlockable)
+				local dice = Dice[unlockable[i]]
+
+				local d = {
+					kind = dice,
+					level = 1,
+				}
+				local j = table.insert(availableDice, d)
+
+				table.insert(upgradeable, d)
+				table.remove(unlockable, i)
+
+				name = dice.name
+
+				collectSound:play()
+			else
+				if (#upgradeable > 0) then
+					local i = love.math.random(1, #upgradeable)
+					local dice = upgradeable[i]
+
+					dice.level = dice.level + 1
+					if (dice.level == #dice.kind.levels) then
+						table.remove(upgradeable, i)
+					end
+
+					name = dice.kind.name
+					collect = true
+
+					upgradeSound:play()
+				end
+			end
+
+			if (name) then
+				Scheduler:waitForP(infoPanel:show(not collect, name))
+				while (true) do
+					local input = Scheduler:waitFor(getInput)
+					if (input == "space") then
+						break
+					end
+				end
+				Scheduler:waitForP(infoPanel:hide())
+			end
+
+			if (name) then
+				local options = {}
+				for i = 1, 4 do
+					if (i ~= dicetile) then
+						table.insert(options, i)
+					end
+				end
+
+				local j = love.math.random(1, #options)
+				dicetile = options[j]
+			end
+
+			if (#upgradeable == 0 and #unlockable == 0) then
+				dicetile = 0
+			end
+		end
+	end
+
+	
+
 	state = Scheduler:enqueue(states.enemiesTurn)
 end
 
@@ -321,6 +435,33 @@ function states.enemiesTurn()
 	for _, enemy in ipairs(enemies) do
 		Scheduler:waitForP(enemy:performTurn())
 	end
+
+	for _, spawnpoint in ipairs(spawnpoints) do
+		World:spawnEnemy(spawnpoint.position)
+	end
+	spawnpoints = {}
+
+	local doSpawn = turn % 3 == 0
+	if (doSpawn) then
+		local x, y
+		while (true) do
+			x = love.math.random(13, 40)
+			y = love.math.random(13, 35)
+
+			if (not World.occupationMap:atOfType(Vec2(x, y), "isWall")) then
+				break
+			end
+		end
+
+		local worldX, worldY = Utils:tileToWorld(x, y)
+
+		table.insert(spawnpoints, {
+			image = FlatSprite(CrosshairSheet.image, CrosshairSheet.quads.spawn, Vec3(worldX, worldY, 0.01), 0),
+			position = Vec2(worldX, worldY)
+		})
+	end
+
+	turn = turn + 1
 
 	state = Scheduler:enqueue(states.roll)
 end
@@ -335,7 +476,7 @@ function love.update(dt)
 
 	Flux.update(dt)
 	Scheduler:update()
-	
+
 	if (gameState == "MENU") then
 
 	end
@@ -350,6 +491,9 @@ end
 function love.draw()
 	if (gameState == "GAME") then
 		World:draw()
+		for _, spawnpoint in ipairs(spawnpoints) do
+			spawnpoint.image:draw()
+		end
 		TDRenderer:flush(Camera, Sun)
 	end
 
@@ -396,7 +540,7 @@ Josh Perry
 Speak
 					]], 5, 268, 140, "right")
 	end
-	
+
 	if (gameState == "MENU") then
 		local p = -love.timer.getTime() * 16
 		menuBackgroundQuad:setViewport(-p, -p + math.sin(love.timer.getTime()) * 32, 640, 360, 640, 384)
@@ -437,6 +581,7 @@ Speak
 
 	if (gameState == "GAME") then
 		dicePanel:draw()
+		infoPanel:draw()
 	end
 
 	love.graphics.setCanvas()

@@ -5,6 +5,10 @@ local Wall = require("src.objects.wall")
 local PawnBlack = require("src.objects.pawnBlack")
 local PawnWhite = require("src.objects.pawnWhite")
 local Knight = require("src.objects.knight")
+local Bishop = require("src.objects.bishop")
+local Rook = require("src.objects.rook")
+local Queen = require("src.objects.queen")
+local DiceTile = require("src.objects.diceTile")
 
 local Tilemap = SheetLoader:loadSheet("assets/tilemap.png", require("assets.tilemap"))
 
@@ -28,10 +32,10 @@ function World:buildCheckersFloor(x, y, z)
 	table.insert(self.floors, floor)
 end
 
-function World:buildDiceTile(x, y)
+function World:buildDiceTile(x, y, index)
 	local quad = Tilemap.quads.floor_dice
 	local worldX, worldY = Utils:tileToWorld(x, y)
-	local floor = Floor(Vec3(worldX, worldY, 0), Tilemap.image, quad, self.occupationMap)
+	local floor = DiceTile(Vec3(worldX, worldY, 0), Tilemap.image, quad, Tilemap.quads.floor_dice_none, index)
 
 	table.insert(self.floors, floor)
 end
@@ -46,12 +50,30 @@ function World:buildWall(x, y, side, top, z)
 	table.insert(self.walls, wall)
 end
 
+local Enemies = {
+	require("src.objects.pawnBlack"),
+	require("src.objects.pawnWhite"),
+	require("src.objects.bishop"),
+	require("src.objects.rook"),
+	require("src.objects.queen"),
+}
+
+function World:spawnEnemy(position)
+	local i = love.math.random(1, #Enemies)
+	local enemyClass = Enemies[i]
+
+	table.insert(self.enemies, enemyClass(Vec3(position.x, position.y, 0), self.occupationMap))
+end
+
 function World:build()
 	self.player = Player(Vec3(20 * 32, 16 * 32, 0), self.occupationMap)
 
-	table.insert(self.enemies, PawnBlack(Vec3(23 * 32, 16 * 32, 0), self.occupationMap))
-	table.insert(self.enemies, PawnWhite(Vec3(25 * 32, 19 * 32, 0), self.occupationMap))
-	table.insert(self.enemies, Knight(Vec3(20 * 32, 20 * 32, 0), self.occupationMap))
+	-- table.insert(self.enemies, PawnBlack(Vec3(23 * 32, 16 * 32, 0), self.occupationMap))
+	-- table.insert(self.enemies, PawnWhite(Vec3(25 * 32, 19 * 32, 0), self.occupationMap))
+	-- table.insert(self.enemies, Knight(Vec3(19 * 32, 20 * 32, 0), self.occupationMap))
+	-- table.insert(self.enemies, Rook(Vec3(20 * 32, 20 * 32, 0), self.occupationMap))
+	-- table.insert(self.enemies, Bishop(Vec3(19 * 32, 21 * 32, 0), self.occupationMap))
+	-- table.insert(self.enemies, Queen(Vec3(20 * 32, 21 * 32, 0), self.occupationMap))
 
 	for x = 13, 41 do
 		for y = 13, 41 do
@@ -250,10 +272,10 @@ function World:build()
 	-- self:buildWall(16, 32, nil, Tilemap.quads.wall_)
 
 
-	self:buildDiceTile(16, 16)
-	self:buildDiceTile(37, 16)
-	self:buildDiceTile(16, 32)
-	self:buildDiceTile(37, 32)
+	self:buildDiceTile(16, 16, 1)
+	self:buildDiceTile(37, 16, 2)
+	self:buildDiceTile(16, 32, 3)
+	self:buildDiceTile(37, 32, 4)
 
 
 	-- for x = 0, width - 1 do

@@ -10,6 +10,12 @@ local Crosshairs = {
 		y = 0,
 		w = 32,
 		h = 32,
+	},
+	spawn = {
+		x = 64,
+		y = 0,
+		w = 32,
+		h = 32,
 	}
 }
 

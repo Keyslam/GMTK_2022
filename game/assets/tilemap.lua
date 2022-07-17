@@ -144,6 +144,12 @@ local Tilemap_New = {
 		w = 32,
 		h = 32
 	},
+	floor_dice_none = {
+		x = 132,
+		y = 33,
+		w = 32,
+		h = 32
+	},
 
 	player = {
 		x = 0,

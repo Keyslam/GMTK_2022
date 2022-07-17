@@ -3,11 +3,12 @@
 [x] Death screen
 [x] Menu
 [x] Sun follow camera
-[ ] Add tons of enemies
+[x] Add tons of enemies
 	[x] Knight: Moves in L shape
-	[ ] Bishop: Moves diagonally, infinitely
-	[ ] Rook: Moves laterally, infinitely
-	[ ] Battleship: Shoots near the player
+	[x] Bishop: Moves diagonally, infinitely
+	[x] Rook: Moves laterally, infinitely
+	[x] Queen: Moves like rook or bishop
+	[-] Battleship: Shoots near the player
+[x] Build the map
 [ ] Add dice upgrading. Figure out the mechanics
-[ ] Build the map
 [ ] Enemy spawning thing

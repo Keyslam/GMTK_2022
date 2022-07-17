@@ -46,6 +46,18 @@ local Chess = {
 		y = 34,
 		w = 16,
 		h = 30,
+	},
+	queen_black = {
+		x = 39,
+		y = 1,
+		w = 18,
+		h = 31,
+	},
+	queen_white = {
+		x = 39,
+		y = 33,
+		w = 18,
+		h = 31,
 	}
 }
 

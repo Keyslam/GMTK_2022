@@ -6,13 +6,7 @@ local Dice = {
 		name = "Basic Dice",
 		levels = {
 			{
-				{ D.value.one, D.value.two }
-			},
-			{
 				{ D.value.one, D.value.two, D.value.three }
-			},
-			{
-				{ D.value.one, D.value.two, D.value.three, D.value.four }
 			},
 			{
 				{ D.value.one, D.value.two, D.value.three, D.value.four, D.value.five }
@@ -51,29 +45,6 @@ local Dice = {
 		},
 	},
 	{
-		name = "Static Dice",
-		levels = {
-			{
-				{ D.value.one },
-			},
-			{
-				{ D.value.two },
-			},
-			{
-				{ D.value.three },
-			},
-			{
-				{ D.value.four },
-			},
-			{
-				{ D.value.five },
-			},
-			{
-				{ D.value.six },
-			},
-		},
-	},
-	{
 		name = "Double Dice",
 		levels = {
 			{
@@ -82,11 +53,11 @@ local Dice = {
 			},
 			{
 				{ D.value.one, D.value.two, D.value.three },
-				{ D.multiplier.one, D.multiplier.two },
+				{ D.multiplier.one, D.multiplier.two, D.multiplier.two },
 			},
 			{
 				{ D.value.one, D.value.two, D.value.three, D.value.four },
-				{ D.multiplier.one, D.multiplier.two },
+				{ D.multiplier.one, D.multiplier.two, D.multiplier.two, D.multiplier.two },
 			}
 		},
 	},
@@ -94,7 +65,13 @@ local Dice = {
 		name = "High Roller Dice",
 		levels = {
 			{
-				{ D.value.one, D.value.two, D.value.three, D.reroll.six },
+				{ D.value.one, D.value.two, D.reroll.six },
+			},
+			{
+				{ D.value.one, D.value.two, D.value.three, D.reroll.six},
+			},
+			{
+				{ D.value.one, D.value.two, D.value.three, D.reroll.six, D.reroll.six }
 			}
 		},
 	},
@@ -109,16 +86,6 @@ local Dice = {
 			},
 			{
 				{ D.reroll.one, D.reroll.one, D.reroll.one, D.value.two },
-			},
-		},
-	},
-	{
-		name = "Debug Dice",
-		levels = {
-			{
-				{ D.reroll.six, D.value.three},
-				{ D.multiplier.two, D.multiplier.one},
-				{ D.multiplier.two, D.multiplier.one}
 			},
 		},
 	},
